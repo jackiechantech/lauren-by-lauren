@@ -9,6 +9,20 @@
   {% render 'product-media-modal' %}
 {% endcomment %}
 
+{%- liquid
+  comment
+    Check if this product should show variant-specific images only
+  endcomment
+  assign show_variants_separately = false
+  assign metafield_value = product.metafields.custom.show_variants_separately.value | default: product.metafields.custom.show_variants_separately
+  if metafield_value == true
+    assign show_variants_separately = true
+  endif
+  
+  assign current_variant = product.selected_or_first_available_variant
+  assign variant_gallery_images = current_variant.metafields.custom.variant_gallery.value | default: blank
+-%}
+
 <product-modal id="ProductModal-{{ section.id }}" class="product-media-modal media-modal">
   <div
     class="product-media-modal__dialog color-{{ section.settings.color_scheme }} gradient"
@@ -32,26 +46,82 @@
       aria-label="{{ 'products.modal.label' | t }}"
       tabindex="0"
     >
-      {%- liquid
-        if product.selected_or_first_available_variant.featured_media != null
-          assign media = product.selected_or_first_available_variant.featured_media
-          render 'product-media', media: media, loop: section.settings.enable_video_looping, variant_image: section.settings.hide_variants
-        endif
-      -%}
-
-      {%- for media in product.media -%}
+      {%- if show_variants_separately -%}
+        {%- comment -%} Variant-specific modal images {%- endcomment -%}
+        {%- assign variant_featured_image = current_variant.featured_image | default: product.featured_media -%}
+        {%- if variant_featured_image != null -%}
+          <div
+            class="product-media-modal__item"
+            data-media-id="{{ section.id }}-variant-{{ current_variant.id }}"
+          >
+            <img
+              class="global-media-settings"
+              srcset="
+                {%- if variant_featured_image.width >= 550 -%}{{ variant_featured_image | image_url: width: 550 }} 550w,{%- endif -%}
+                {%- if variant_featured_image.width >= 1100 -%}{{ variant_featured_image | image_url: width: 1100 }} 1100w,{%- endif -%}
+                {%- if variant_featured_image.width >= 1445 -%}{{ variant_featured_image | image_url: width: 1445 }} 1445w,{%- endif -%}
+                {%- if variant_featured_image.width >= 1680 -%}{{ variant_featured_image | image_url: width: 1680 }} 1680w,{%- endif -%}
+                {%- if variant_featured_image.width >= 2048 -%}{{ variant_featured_image | image_url: width: 2048 }} 2048w,{%- endif -%}
+                {%- if variant_featured_image.width >= 4096 -%}{{ variant_featured_image | image_url: width: 4096 }} 4096w,{%- endif -%}
+                {{ variant_featured_image | image_url }} {{ variant_featured_image.width }}w
+              "
+              src="{{ variant_featured_image | image_url: width: 1445 }}"
+              sizes="(min-width: 750px) calc(100vw - 22rem), 1100px"
+              alt="{{ variant_featured_image.alt | default: product.title | escape }}"
+              width="{{ variant_featured_image.width }}"
+              height="{{ variant_featured_image.height }}"
+            >
+          </div>
+        {%- endif -%}
+        {%- if variant_gallery_images != blank and variant_gallery_images.size > 0 -%}
+          {%- for img in variant_gallery_images -%}
+            <div
+              class="product-media-modal__item"
+              data-media-id="{{ section.id }}-variant-gallery-{{ forloop.index }}"
+            >
+              <img
+                class="global-media-settings"
+                srcset="
+                  {%- if img.image.width >= 550 -%}{{ img.image | image_url: width: 550 }} 550w,{%- endif -%}
+                  {%- if img.image.width >= 1100 -%}{{ img.image | image_url: width: 1100 }} 1100w,{%- endif -%}
+                  {%- if img.image.width >= 1445 -%}{{ img.image | image_url: width: 1445 }} 1445w,{%- endif -%}
+                  {%- if img.image.width >= 1680 -%}{{ img.image | image_url: width: 1680 }} 1680w,{%- endif -%}
+                  {%- if img.image.width >= 2048 -%}{{ img.image | image_url: width: 2048 }} 2048w,{%- endif -%}
+                  {%- if img.image.width >= 4096 -%}{{ img.image | image_url: width: 4096 }} 4096w,{%- endif -%}
+                  {{ img.image | image_url }} {{ img.image.width }}w
+                "
+                src="{{ img.image | image_url: width: 1445 }}"
+                sizes="(min-width: 750px) calc(100vw - 22rem), 1100px"
+                alt="{{ img.image.alt | default: product.title | escape }}"
+                width="{{ img.image.width }}"
+                height="{{ img.image.height }}"
+              >
+            </div>
+          {%- endfor -%}
+        {%- endif -%}
+      {%- else -%}
+        {%- comment -%} Normal product modal images {%- endcomment -%}
         {%- liquid
-          if section.settings.hide_variants and variant_images contains media.src or variant_images contains media.id
-            assign variant_image = true
-          else
-            assign variant_image = false
+          if product.selected_or_first_available_variant.featured_media != null
+            assign media = product.selected_or_first_available_variant.featured_media
+            render 'product-media', media: media, loop: section.settings.enable_video_looping, variant_image: section.settings.hide_variants
           endif
-
-          unless media.id == product.selected_or_first_available_variant.featured_media.id
-            render 'product-media', media: media, loop: section.settings.enable_video_looping, variant_image: variant_image
-          endunless
         -%}
-      {%- endfor -%}
+
+        {%- for media in product.media -%}
+          {%- liquid
+            if section.settings.hide_variants and variant_images contains media.src or variant_images contains media.id
+              assign variant_image = true
+            else
+              assign variant_image = false
+            endif
+
+            unless media.id == product.selected_or_first_available_variant.featured_media.id
+              render 'product-media', media: media, loop: section.settings.enable_video_looping, variant_image: variant_image
+            endunless
+          -%}
+        {%- endfor -%}
+      {%- endif -%}
     </div>
   </div>
 </product-modal>
