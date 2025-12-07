@@ -72,7 +72,17 @@
   {% endif %}
   aria-label="{{ 'products.product.media.gallery_viewer' | t }}"
   data-desktop-layout="{{ section.settings.gallery_layout }}"
+  {% if show_variants_separately %}
+    data-variant-gallery="true"
+    data-section-id="{{ section.id }}"
+  {% endif %}
 >
+  {%- if show_variants_separately -%}
+    <script src="{{ 'variant-gallery-updater.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
+  {%- if show_variants_separately -%}
+    <script src="{{ 'variant-gallery-updater.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
   <div id="GalleryStatus-{{ section.id }}" class="visually-hidden" role="status"></div>
   <slider-component id="GalleryViewer-{{ section.id }}" class="slider-mobile-gutter">
     <a class="skip-to-content-link button visually-hidden quick-add-hidden" href="#ProductInfo-{{ section.id }}">
