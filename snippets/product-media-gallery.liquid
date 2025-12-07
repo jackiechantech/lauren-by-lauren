@@ -106,38 +106,48 @@
             data-media-id="{{ section.id }}-variant-{{ current_variant.id }}"
           >
             {%- assign media_position = 1 -%}
+            {%- capture sizes -%}
+              (min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 100 | times: media_width | round }}px, (min-width: 990px) calc({{ media_width | times: 100 }}vw - 10rem), (min-width: 750px) calc((100vw - 11.5rem) / 2), calc(100vw - 4rem)
+            {%- endcapture -%}
             <div
-              class="product__media media gradient global-media-settings{% unless section.settings.media_fit == 'contain' %} media--{{ section.settings.media_fit }}{% endunless %}{% if section.settings.media_fit == 'contain' %} constrain-height{% endif %}"
-              {% if section.settings.media_fit == 'contain' %}
-                style="padding-top: {{ 1 | divided_by: variant_featured_image.aspect_ratio | times: 100 }}%;"
-              {% endif %}
+              class="product-media-container media-type-image media-fit-{{ section.settings.media_fit }} global-media-settings gradient{% if section.settings.constrain_to_viewport %} constrain-height{% endif %}"
+              style="--ratio: {{ variant_featured_image.aspect_ratio | default: 1.0 }}; --preview-ratio: {{ variant_featured_image.aspect_ratio | default: 1.0 }};"
             >
-              <modal-opener class="product__modal-opener product__modal-opener--image" data-modal="#ProductModal-{{ section.id }}">
-                <span class="product__media-icon motion-reduce quick-add-hidden" aria-hidden="true">
-                  {{- 'icon-zoom.svg' | inline_asset_content -}}
+              <modal-opener
+                class="product__modal-opener product__modal-opener--image"
+                data-modal="#ProductModal-{{ section.id }}"
+              >
+                <span class="product__media-icon motion-reduce quick-add-hidden product__media-icon--{{ section.settings.image_zoom }}" aria-hidden="true">
+                  <span class="svg-wrapper">
+                    {{- 'icon-zoom.svg' | inline_asset_content -}}
+                  </span>
                 </span>
-                <img
-                  srcset="
-                    {%- if variant_featured_image.width >= 493 -%}{{ variant_featured_image | image_url: width: 493 }} 493w,{%- endif -%}
-                    {%- if variant_featured_image.width >= 600 -%}{{ variant_featured_image | image_url: width: 600 }} 600w,{%- endif -%}
-                    {%- if variant_featured_image.width >= 713 -%}{{ variant_featured_image | image_url: width: 713 }} 713w,{%- endif -%}
-                    {%- if variant_featured_image.width >= 823 -%}{{ variant_featured_image | image_url: width: 823 }} 823w,{%- endif -%}
-                    {%- if variant_featured_image.width >= 990 -%}{{ variant_featured_image | image_url: width: 990 }} 990w,{%- endif -%}
-                    {%- if variant_featured_image.width >= 1100 -%}{{ variant_featured_image | image_url: width: 1100 }} 1100w,{%- endif -%}
-                    {%- if variant_featured_image.width >= 1206 -%}{{ variant_featured_image | image_url: width: 1206 }} 1206w,{%- endif -%}
-                    {%- if variant_featured_image.width >= 1346 -%}{{ variant_featured_image | image_url: width: 1346 }} 1346w,{%- endif -%}
-                    {%- if variant_featured_image.width >= 1426 -%}{{ variant_featured_image | image_url: width: 1426 }} 1426w,{%- endif -%}
-                    {%- if variant_featured_image.width >= 1646 -%}{{ variant_featured_image | image_url: width: 1646 }} 1646w,{%- endif -%}
-                    {%- if variant_featured_image.width >= 1946 -%}{{ variant_featured_image | image_url: width: 1946 }} 1946w,{%- endif -%}
-                    {{ variant_featured_image | image_url }} {{ variant_featured_image.width }}w
-                  "
-                  src="{{ variant_featured_image | image_url: width: 1946 }}"
-                  sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 100 | times: media_width | round }}px, (min-width: 990px) calc({{ media_width | times: 100 }}vw - 10rem), (min-width: 750px) calc((100vw - 11.5rem) / 2), calc(100vw - 4rem)"
-                  alt="{{ variant_featured_image.alt | default: product.title | escape }}"
-                  loading="eager"
-                  width="{{ variant_featured_image.width }}"
-                  height="{{ variant_featured_image.height }}"
-                >
+                {%- render 'loading-spinner' -%}
+                <div class="product__media media media--transparent">
+                  <img
+                    srcset="
+                      {%- if variant_featured_image.width >= 493 -%}{{ variant_featured_image | image_url: width: 493 }} 493w,{%- endif -%}
+                      {%- if variant_featured_image.width >= 600 -%}{{ variant_featured_image | image_url: width: 600 }} 600w,{%- endif -%}
+                      {%- if variant_featured_image.width >= 713 -%}{{ variant_featured_image | image_url: width: 713 }} 713w,{%- endif -%}
+                      {%- if variant_featured_image.width >= 823 -%}{{ variant_featured_image | image_url: width: 823 }} 823w,{%- endif -%}
+                      {%- if variant_featured_image.width >= 990 -%}{{ variant_featured_image | image_url: width: 990 }} 990w,{%- endif -%}
+                      {%- if variant_featured_image.width >= 1100 -%}{{ variant_featured_image | image_url: width: 1100 }} 1100w,{%- endif -%}
+                      {%- if variant_featured_image.width >= 1206 -%}{{ variant_featured_image | image_url: width: 1206 }} 1206w,{%- endif -%}
+                      {%- if variant_featured_image.width >= 1346 -%}{{ variant_featured_image | image_url: width: 1346 }} 1346w,{%- endif -%}
+                      {%- if variant_featured_image.width >= 1426 -%}{{ variant_featured_image | image_url: width: 1426 }} 1426w,{%- endif -%}
+                      {%- if variant_featured_image.width >= 1646 -%}{{ variant_featured_image | image_url: width: 1646 }} 1646w,{%- endif -%}
+                      {%- if variant_featured_image.width >= 1946 -%}{{ variant_featured_image | image_url: width: 1946 }} 1946w,{%- endif -%}
+                      {{ variant_featured_image | image_url }} {{ variant_featured_image.width }}w
+                    "
+                    src="{{ variant_featured_image | image_url: width: 1946 }}"
+                    sizes="{{ sizes }}"
+                    alt="{{ variant_featured_image.alt | default: product.title | escape }}"
+                    class="image-magnify-{{ section.settings.image_zoom }}"
+                    {% unless lazy_load == false %}loading="lazy"{% endunless %}
+                    width="{{ variant_featured_image.width }}"
+                    height="{{ variant_featured_image.height }}"
+                  >
+                </div>
               </modal-opener>
             </div>
           </li>
@@ -151,38 +161,48 @@
               data-media-id="{{ section.id }}-variant-gallery-{{ forloop.index }}"
             >
               {%- assign media_position = media_position | plus: 1 -%}
+              {%- capture sizes -%}
+                (min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 100 | times: media_width | round }}px, (min-width: 990px) calc({{ media_width | times: 100 }}vw - 10rem), (min-width: 750px) calc((100vw - 11.5rem) / 2), calc(100vw - 4rem)
+              {%- endcapture -%}
               <div
-                class="product__media media gradient global-media-settings{% unless section.settings.media_fit == 'contain' %} media--{{ section.settings.media_fit }}{% endunless %}{% if section.settings.media_fit == 'contain' %} constrain-height{% endif %}"
-                {% if section.settings.media_fit == 'contain' %}
-                  style="padding-top: {{ 1 | divided_by: img.image.aspect_ratio | times: 100 }}%;"
-                {% endif %}
+                class="product-media-container media-type-image media-fit-{{ section.settings.media_fit }} global-media-settings gradient{% if section.settings.constrain_to_viewport %} constrain-height{% endif %}"
+                style="--ratio: {{ img.image.aspect_ratio | default: 1.0 }}; --preview-ratio: {{ img.image.aspect_ratio | default: 1.0 }};"
               >
-                <modal-opener class="product__modal-opener product__modal-opener--image" data-modal="#ProductModal-{{ section.id }}">
-                  <span class="product__media-icon motion-reduce quick-add-hidden" aria-hidden="true">
-                    {{- 'icon-zoom.svg' | inline_asset_content -}}
+                <modal-opener
+                  class="product__modal-opener product__modal-opener--image"
+                  data-modal="#ProductModal-{{ section.id }}"
+                >
+                  <span class="product__media-icon motion-reduce quick-add-hidden product__media-icon--{{ section.settings.image_zoom }}" aria-hidden="true">
+                    <span class="svg-wrapper">
+                      {{- 'icon-zoom.svg' | inline_asset_content -}}
+                    </span>
                   </span>
-                  <img
-                    srcset="
-                      {%- if img.image.width >= 493 -%}{{ img.image | image_url: width: 493 }} 493w,{%- endif -%}
-                      {%- if img.image.width >= 600 -%}{{ img.image | image_url: width: 600 }} 600w,{%- endif -%}
-                      {%- if img.image.width >= 713 -%}{{ img.image | image_url: width: 713 }} 713w,{%- endif -%}
-                      {%- if img.image.width >= 823 -%}{{ img.image | image_url: width: 823 }} 823w,{%- endif -%}
-                      {%- if img.image.width >= 990 -%}{{ img.image | image_url: width: 990 }} 990w,{%- endif -%}
-                      {%- if img.image.width >= 1100 -%}{{ img.image | image_url: width: 1100 }} 1100w,{%- endif -%}
-                      {%- if img.image.width >= 1206 -%}{{ img.image | image_url: width: 1206 }} 1206w,{%- endif -%}
-                      {%- if img.image.width >= 1346 -%}{{ img.image | image_url: width: 1346 }} 1346w,{%- endif -%}
-                      {%- if img.image.width >= 1426 -%}{{ img.image | image_url: width: 1426 }} 1426w,{%- endif -%}
-                      {%- if img.image.width >= 1646 -%}{{ img.image | image_url: width: 1646 }} 1646w,{%- endif -%}
-                      {%- if img.image.width >= 1946 -%}{{ img.image | image_url: width: 1946 }} 1946w,{%- endif -%}
-                      {{ img.image | image_url }} {{ img.image.width }}w
-                    "
-                    src="{{ img.image | image_url: width: 1946 }}"
-                    sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 100 | times: media_width | round }}px, (min-width: 990px) calc({{ media_width | times: 100 }}vw - 10rem), (min-width: 750px) calc((100vw - 11.5rem) / 2), calc(100vw - 4rem)"
-                    alt="{{ img.image.alt | default: product.title | escape }}"
-                    loading="lazy"
-                    width="{{ img.image.width }}"
-                    height="{{ img.image.height }}"
-                  >
+                  {%- render 'loading-spinner' -%}
+                  <div class="product__media media media--transparent">
+                    <img
+                      srcset="
+                        {%- if img.image.width >= 493 -%}{{ img.image | image_url: width: 493 }} 493w,{%- endif -%}
+                        {%- if img.image.width >= 600 -%}{{ img.image | image_url: width: 600 }} 600w,{%- endif -%}
+                        {%- if img.image.width >= 713 -%}{{ img.image | image_url: width: 713 }} 713w,{%- endif -%}
+                        {%- if img.image.width >= 823 -%}{{ img.image | image_url: width: 823 }} 823w,{%- endif -%}
+                        {%- if img.image.width >= 990 -%}{{ img.image | image_url: width: 990 }} 990w,{%- endif -%}
+                        {%- if img.image.width >= 1100 -%}{{ img.image | image_url: width: 1100 }} 1100w,{%- endif -%}
+                        {%- if img.image.width >= 1206 -%}{{ img.image | image_url: width: 1206 }} 1206w,{%- endif -%}
+                        {%- if img.image.width >= 1346 -%}{{ img.image | image_url: width: 1346 }} 1346w,{%- endif -%}
+                        {%- if img.image.width >= 1426 -%}{{ img.image | image_url: width: 1426 }} 1426w,{%- endif -%}
+                        {%- if img.image.width >= 1646 -%}{{ img.image | image_url: width: 1646 }} 1646w,{%- endif -%}
+                        {%- if img.image.width >= 1946 -%}{{ img.image | image_url: width: 1946 }} 1946w,{%- endif -%}
+                        {{ img.image | image_url }} {{ img.image.width }}w
+                      "
+                      src="{{ img.image | image_url: width: 1946 }}"
+                      sizes="{{ sizes }}"
+                      alt="{{ img.image.alt | default: product.title | escape }}"
+                      class="image-magnify-{{ section.settings.image_zoom }}"
+                      loading="lazy"
+                      width="{{ img.image.width }}"
+                      height="{{ img.image.height }}"
+                    >
+                  </div>
                 </modal-opener>
               </div>
             </li>
