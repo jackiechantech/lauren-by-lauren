@@ -48,7 +48,19 @@
     >
       {%- if show_variants_separately -%}
         {%- comment -%} Variant-specific modal images {%- endcomment -%}
-        {%- assign variant_featured_image = current_variant.featured_image | default: current_variant.image | default: product.featured_media -%}
+        {%- comment -%} Find the variant's image object from product.media {%- endcomment -%}
+        {%- assign variant_featured_image = null -%}
+        {%- if current_variant.image -%}
+          {%- for media in product.media -%}
+            {%- if media.src == current_variant.image or media.id == current_variant.image.id -%}
+              {%- assign variant_featured_image = media -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+        {%- if variant_featured_image == null -%}
+          {%- assign variant_featured_image = product.featured_media -%}
+        {%- endif -%}
         {%- if variant_featured_image != null -%}
           <div
             class="product-media-modal__item"

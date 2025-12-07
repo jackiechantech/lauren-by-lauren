@@ -84,24 +84,21 @@
       role="list"
       {% if show_variants_separately %}data-variant-gallery="true"{% endif %}
     >
-      {%- comment -%} DEBUG - Remove after testing {%- endcomment -%}
-      {%- if show_variants_separately -%}
-        <div style="background: yellow; padding: 10px; margin: 10px;">
-          <strong>Debug Info:</strong><br>
-          Show Variants Separately: {{ show_variants_separately }}<br>
-          Current Variant ID: {{ current_variant.id }}<br>
-          Variant Featured Image: {{ current_variant.featured_image }}<br>
-          Variant Image Exists: {{ current_variant.image }}<br>
-          Product Featured Media: {{ product.featured_media }}<br>
-          Gallery Images Count: {{ variant_gallery_images.size }}<br>
-          Variant Title: {{ current_variant.title }}
-        </div>
-      {%- endif -%}
-      {%- comment -%} END DEBUG {%- endcomment -%}
-      
       {%- if show_variants_separately -%}
         {%- comment -%} Variant-specific gallery: show only variant image + metafield images {%- endcomment -%}
-        {%- assign variant_featured_image = current_variant.featured_image | default: current_variant.image | default: product.featured_media -%}
+        {%- comment -%} Find the variant's image object from product.media {%- endcomment -%}
+        {%- assign variant_featured_image = null -%}
+        {%- if current_variant.image -%}
+          {%- for media in product.media -%}
+            {%- if media.src == current_variant.image or media.id == current_variant.image.id -%}
+              {%- assign variant_featured_image = media -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+        {%- if variant_featured_image == null -%}
+          {%- assign variant_featured_image = product.featured_media -%}
+        {%- endif -%}
         {%- if variant_featured_image != null -%}
           <li
             id="Slide-{{ section.id }}-variant-{{ current_variant.id }}"
@@ -341,7 +338,19 @@
 
         {%- if show_variants_separately -%}
           {%- comment -%} Variant-specific thumbnails {%- endcomment -%}
-          {%- assign variant_featured_img = current_variant.featured_image | default: current_variant.image | default: product.featured_media -%}
+          {%- comment -%} Find the variant's image object from product.media {%- endcomment -%}
+          {%- assign variant_featured_img = null -%}
+          {%- if current_variant.image -%}
+            {%- for media in product.media -%}
+              {%- if media.src == current_variant.image or media.id == current_variant.image.id -%}
+                {%- assign variant_featured_img = media -%}
+                {%- break -%}
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endif -%}
+          {%- if variant_featured_img == null -%}
+            {%- assign variant_featured_img = product.featured_media -%}
+          {%- endif -%}
           {%- if variant_featured_img != null -%}
             <li
               id="Slide-Thumbnails-{{ section.id }}-0"
