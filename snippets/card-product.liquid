@@ -70,24 +70,26 @@
                   <div class="card__media-slides">
                     {%- for media in card_images -%}
                       <div class="card__media-slide">
-                        <img
-                          srcset="
-                            {%- if media.width >= 165 -%}{{ media | image_url: width: 165 }} 165w,{%- endif -%}
-                            {%- if media.width >= 360 -%}{{ media | image_url: width: 360 }} 360w,{%- endif -%}
-                            {%- if media.width >= 533 -%}{{ media | image_url: width: 533 }} 533w,{%- endif -%}
-                            {%- if media.width >= 720 -%}{{ media | image_url: width: 720 }} 720w,{%- endif -%}
-                            {%- if media.width >= 940 -%}{{ media | image_url: width: 940 }} 940w,{%- endif -%}
-                            {%- if media.width >= 1066 -%}{{ media | image_url: width: 1066 }} 1066w,{%- endif -%}
-                            {{ media | image_url }} {{ media.width }}w
-                          "
-                          src="{{ media | image_url: width: 533 }}"
-                          sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
-                          alt="{{ media.alt | escape }}"
-                          class="motion-reduce"
-                          {% if forloop.index > 1 %}loading="lazy"{% else %}{% unless lazy_load == false %}loading="lazy"{% endunless %}{% endif %}
-                          width="{{ media.width }}"
-                          height="{{ media.height }}"
-                        >
+                        <a href="{{ card_product.url }}" class="full-unstyled-link">
+                          <img
+                            srcset="
+                              {%- if media.width >= 165 -%}{{ media | image_url: width: 165 }} 165w,{%- endif -%}
+                              {%- if media.width >= 360 -%}{{ media | image_url: width: 360 }} 360w,{%- endif -%}
+                              {%- if media.width >= 533 -%}{{ media | image_url: width: 533 }} 533w,{%- endif -%}
+                              {%- if media.width >= 720 -%}{{ media | image_url: width: 720 }} 720w,{%- endif -%}
+                              {%- if media.width >= 940 -%}{{ media | image_url: width: 940 }} 940w,{%- endif -%}
+                              {%- if media.width >= 1066 -%}{{ media | image_url: width: 1066 }} 1066w,{%- endif -%}
+                              {{ media | image_url }} {{ media.width }}w
+                            "
+                            src="{{ media | image_url: width: 533 }}"
+                            sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
+                            alt="{{ media.alt | escape }}"
+                            class="motion-reduce"
+                            {% if forloop.index > 1 %}loading="lazy"{% else %}{% unless lazy_load == false %}loading="lazy"{% endunless %}{% endif %}
+                            width="{{ media.width }}"
+                            height="{{ media.height }}"
+                          >
+                        </a>
                       </div>
                     {%- endfor -%}
                   </div>
