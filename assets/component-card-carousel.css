@@ -5,13 +5,11 @@
   height: 100%;
   overflow: hidden;
   display: block;
-  z-index: 2;
 }
 
-/* Ensure the entire card__media area is above the card link overlay */
-.card__media {
+/* Make the media element establish a stacking context only when it has a carousel */
+.card__media:has(.card__media-carousel) {
   z-index: 2;
-  position: relative;
 }
 
 .card__media-carousel .media {
