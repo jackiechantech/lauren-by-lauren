@@ -5,6 +5,13 @@
   height: 100%;
   overflow: hidden;
   display: block;
+  z-index: 2;
+}
+
+/* Ensure the entire card__media area is above the card link overlay */
+.card__media {
+  z-index: 2;
+  position: relative;
 }
 
 .card__media-carousel .media {
@@ -57,9 +64,10 @@
   justify-content: center;
   opacity: 0;
   transition: opacity 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
-  z-index: 10;
+  z-index: 100;
   padding: 0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  pointer-events: auto;
 }
 
 .card__carousel-nav svg {
@@ -100,9 +108,10 @@
   transform: translateX(-50%);
   display: flex;
   gap: 6px;
-  z-index: 2;
+  z-index: 100;
   opacity: 0;
   transition: opacity 0.2s ease;
+  pointer-events: auto;
 }
 
 .card-wrapper:hover .card__carousel-dots,
@@ -119,6 +128,7 @@
   cursor: pointer;
   padding: 0;
   transition: background-color 0.2s ease;
+  pointer-events: auto;
 }
 
 .card__carousel-dot.is-active {
@@ -155,7 +165,7 @@
 
 /* Ensure proper stacking with badges */
 .card__badge {
-  z-index: 3;
+  z-index: 101;
 }
 
 
