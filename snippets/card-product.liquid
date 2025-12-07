@@ -70,7 +70,7 @@
                   <div class="card__media-slides">
                     {%- for media in card_images -%}
                       <div class="card__media-slide">
-                        <a href="{{ card_product.url }}" class="full-unstyled-link">
+                        <a href="{{ card_product.url }}" class="full-unstyled-link" tabindex="-1">
                           <img
                             srcset="
                               {%- if media.width >= 165 -%}{{ media | image_url: width: 165 }} 165w,{%- endif -%}
@@ -94,19 +94,19 @@
                     {%- endfor -%}
                   </div>
                 </div>
-                <button type="button" class="card__carousel-nav card__carousel-nav--prev" aria-label="{{ 'accessibility.previous_slide' | t }}">
+                <button type="button" class="card__carousel-nav card__carousel-nav--prev" aria-label="Previous image">
                   <svg viewBox="0 0 14 10" fill="none" aria-hidden="true" focusable="false">
                     <path fill-rule="evenodd" clip-rule="evenodd" d="M8.537.808a.5.5 0 01.817-.162l4 4a.5.5 0 010 .708l-4 4a.5.5 0 11-.708-.708L11.793 5.5H1a.5.5 0 010-1h10.793L8.646 1.354a.5.5 0 01-.109-.546z" fill="currentColor" transform="scale(-1, 1) translate(-14, 0)"></path>
                   </svg>
                 </button>
-                <button type="button" class="card__carousel-nav card__carousel-nav--next" aria-label="{{ 'accessibility.next_slide' | t }}">
+                <button type="button" class="card__carousel-nav card__carousel-nav--next" aria-label="Next image">
                   <svg viewBox="0 0 14 10" fill="none" aria-hidden="true" focusable="false">
                     <path fill-rule="evenodd" clip-rule="evenodd" d="M8.537.808a.5.5 0 01.817-.162l4 4a.5.5 0 010 .708l-4 4a.5.5 0 11-.708-.708L11.793 5.5H1a.5.5 0 010-1h10.793L8.646 1.354a.5.5 0 01-.109-.546z" fill="currentColor"></path>
                   </svg>
                 </button>
                 <div class="card__carousel-dots">
                   {%- for media in card_images -%}
-                    <button type="button" class="card__carousel-dot{% if forloop.first %} is-active{% endif %}" aria-label="{{ 'accessibility.go_to_slide' | t: num: forloop.index }}"></button>
+                    <button type="button" class="card__carousel-dot{% if forloop.first %} is-active{% endif %}" aria-label="Go to image {{ forloop.index }}"></button>
                   {%- endfor -%}
                 </div>
               </card-carousel>

@@ -4,6 +4,7 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
+  display: block;
 }
 
 .card__media-carousel .media {
@@ -17,6 +18,7 @@
   transition: transform 0.3s ease-out;
   height: 100%;
   width: 100%;
+  will-change: transform;
 }
 
 .card__media-slide {
@@ -30,6 +32,13 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
+}
+
+.card__media-slide a {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 /* Navigation Arrows - Hidden on mobile */
@@ -37,9 +46,9 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 32px;
-  height: 32px;
-  background: rgba(255, 255, 255, 0.9);
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.95);
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 50%;
   cursor: pointer;
@@ -47,35 +56,40 @@
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.2s ease, background-color 0.2s ease;
-  z-index: 2;
+  transition: opacity 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  z-index: 10;
   padding: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .card__carousel-nav svg {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
 }
 
 .card__carousel-nav--prev {
-  left: 8px;
+  left: 10px;
 }
 
 .card__carousel-nav--next {
-  right: 8px;
+  right: 10px;
 }
 
+.card-wrapper:hover .card__carousel-nav,
 .card__media-carousel:hover .card__carousel-nav {
   opacity: 1;
 }
 
 .card__carousel-nav:hover {
   background: rgba(255, 255, 255, 1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .card__carousel-nav:disabled {
-  opacity: 0 !important;
+  opacity: 0.3;
   cursor: default;
+  pointer-events: none;
 }
 
 /* Dots indicator */
@@ -91,7 +105,7 @@
   transition: opacity 0.2s ease;
 }
 
-.card__media-carousel:hover .card__carousel-dots,
+.card-wrapper:hover .card__carousel-dots,
 .card__media-carousel.is-touching .card__carousel-dots {
   opacity: 1;
 }

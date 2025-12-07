@@ -30,21 +30,32 @@ class CardCarousel extends HTMLElement {
   init() {
     if (this.totalSlides <= 1) return;
     
+    // Prevent clicks on the carousel from navigating to product page
+    this.addEventListener('click', (e) => {
+      if (e.target.closest('.card__carousel-nav') || e.target.closest('.card__carousel-dot')) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+      }
+    }, true);
+    
     // Arrow navigation
     if (this.prevBtn) {
       this.prevBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         this.prev();
-      });
+      }, true);
     }
     
     if (this.nextBtn) {
       this.nextBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         this.next();
-      });
+      }, true);
     }
     
     // Dot navigation
@@ -52,8 +63,9 @@ class CardCarousel extends HTMLElement {
       dot.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         this.goToSlide(index);
-      });
+      }, true);
     });
     
     // Touch events for mobile swipe
@@ -91,6 +103,11 @@ class CardCarousel extends HTMLElement {
     this.updateSlidePosition();
     this.updateButtons();
     this.updateDots();
+    
+    // Ensure transition completes
+    setTimeout(() => {
+      this.isTransitioning = false;
+    }, 300);
   }
   
   next() {
@@ -111,6 +128,11 @@ class CardCarousel extends HTMLElement {
     this.updateSlidePosition();
     this.updateButtons();
     this.updateDots();
+    
+    // Ensure transition completes
+    setTimeout(() => {
+      this.isTransitioning = false;
+    }, 300);
   }
   
   goToSlide(index) {
