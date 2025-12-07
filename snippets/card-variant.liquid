@@ -80,55 +80,51 @@
           <div class="card__media{% if image_shape and image_shape != 'default' %} shape--{{ image_shape }} color-{{ settings.card_color_scheme }} gradient{% endif %}">
             {%- if has_additional_images -%}
               {%- comment -%} Carousel with variant featured image + additional images from metafield {%- endcomment -%}
-              <card-carousel class="card__media-carousel">
+              <card-carousel class="card__media-carousel" data-product-url="{{ variant_url }}">
                 <div class="media media--transparent">
                   <div class="card__media-slides">
                     {%- comment -%} First slide: variant's featured image {%- endcomment -%}
                     <div class="card__media-slide">
-                      <a href="{{ variant_url }}" class="full-unstyled-link">
-                        <img
-                          srcset="
-                            {%- if variant_image.width >= 165 -%}{{ variant_image | image_url: width: 165 }} 165w,{%- endif -%}
-                            {%- if variant_image.width >= 360 -%}{{ variant_image | image_url: width: 360 }} 360w,{%- endif -%}
-                            {%- if variant_image.width >= 533 -%}{{ variant_image | image_url: width: 533 }} 533w,{%- endif -%}
-                            {%- if variant_image.width >= 720 -%}{{ variant_image | image_url: width: 720 }} 720w,{%- endif -%}
-                            {%- if variant_image.width >= 940 -%}{{ variant_image | image_url: width: 940 }} 940w,{%- endif -%}
-                            {%- if variant_image.width >= 1066 -%}{{ variant_image | image_url: width: 1066 }} 1066w,{%- endif -%}
-                            {{ variant_image | image_url }} {{ variant_image.width }}w
-                          "
-                          src="{{ variant_image | image_url: width: 533 }}"
-                          sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
-                          alt="{{ variant_image.alt | default: variant_title | escape }}"
-                          class="motion-reduce"
-                          {% unless lazy_load == false %}loading="lazy"{% endunless %}
-                          width="{{ variant_image.width }}"
-                          height="{{ variant_image.height }}"
-                        >
-                      </a>
+                      <img
+                        srcset="
+                          {%- if variant_image.width >= 165 -%}{{ variant_image | image_url: width: 165 }} 165w,{%- endif -%}
+                          {%- if variant_image.width >= 360 -%}{{ variant_image | image_url: width: 360 }} 360w,{%- endif -%}
+                          {%- if variant_image.width >= 533 -%}{{ variant_image | image_url: width: 533 }} 533w,{%- endif -%}
+                          {%- if variant_image.width >= 720 -%}{{ variant_image | image_url: width: 720 }} 720w,{%- endif -%}
+                          {%- if variant_image.width >= 940 -%}{{ variant_image | image_url: width: 940 }} 940w,{%- endif -%}
+                          {%- if variant_image.width >= 1066 -%}{{ variant_image | image_url: width: 1066 }} 1066w,{%- endif -%}
+                          {{ variant_image | image_url }} {{ variant_image.width }}w
+                        "
+                        src="{{ variant_image | image_url: width: 533 }}"
+                        sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
+                        alt="{{ variant_image.alt | default: variant_title | escape }}"
+                        class="motion-reduce"
+                        {% unless lazy_load == false %}loading="lazy"{% endunless %}
+                        width="{{ variant_image.width }}"
+                        height="{{ variant_image.height }}"
+                      >
                     </div>
                     {%- comment -%} Additional slides from metafield {%- endcomment -%}
                     {%- for img in additional_images -%}
                       <div class="card__media-slide">
-                        <a href="{{ variant_url }}" class="full-unstyled-link">
-                          <img
-                            srcset="
-                              {%- if img.image.width >= 165 -%}{{ img.image | image_url: width: 165 }} 165w,{%- endif -%}
-                              {%- if img.image.width >= 360 -%}{{ img.image | image_url: width: 360 }} 360w,{%- endif -%}
-                              {%- if img.image.width >= 533 -%}{{ img.image | image_url: width: 533 }} 533w,{%- endif -%}
-                              {%- if img.image.width >= 720 -%}{{ img.image | image_url: width: 720 }} 720w,{%- endif -%}
-                              {%- if img.image.width >= 940 -%}{{ img.image | image_url: width: 940 }} 940w,{%- endif -%}
-                              {%- if img.image.width >= 1066 -%}{{ img.image | image_url: width: 1066 }} 1066w,{%- endif -%}
-                              {{ img.image | image_url }} {{ img.image.width }}w
-                            "
-                            src="{{ img.image | image_url: width: 533 }}"
-                            sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
-                            alt="{{ img.image.alt | default: variant_title | escape }}"
-                            class="motion-reduce"
-                            loading="lazy"
-                            width="{{ img.image.width }}"
-                            height="{{ img.image.height }}"
-                          >
-                        </a>
+                        <img
+                          srcset="
+                            {%- if img.image.width >= 165 -%}{{ img.image | image_url: width: 165 }} 165w,{%- endif -%}
+                            {%- if img.image.width >= 360 -%}{{ img.image | image_url: width: 360 }} 360w,{%- endif -%}
+                            {%- if img.image.width >= 533 -%}{{ img.image | image_url: width: 533 }} 533w,{%- endif -%}
+                            {%- if img.image.width >= 720 -%}{{ img.image | image_url: width: 720 }} 720w,{%- endif -%}
+                            {%- if img.image.width >= 940 -%}{{ img.image | image_url: width: 940 }} 940w,{%- endif -%}
+                            {%- if img.image.width >= 1066 -%}{{ img.image | image_url: width: 1066 }} 1066w,{%- endif -%}
+                            {{ img.image | image_url }} {{ img.image.width }}w
+                          "
+                          src="{{ img.image | image_url: width: 533 }}"
+                          sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
+                          alt="{{ img.image.alt | default: variant_title | escape }}"
+                          class="motion-reduce"
+                          loading="lazy"
+                          width="{{ img.image.width }}"
+                          height="{{ img.image.height }}"
+                        >
                       </div>
                     {%- endfor -%}
                   </div>

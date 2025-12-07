@@ -30,42 +30,59 @@ class CardCarousel extends HTMLElement {
   init() {
     if (this.totalSlides <= 1) return;
     
-    // Prevent clicks on the carousel from navigating to product page
-    this.addEventListener('click', (e) => {
-      if (e.target.closest('.card__carousel-nav') || e.target.closest('.card__carousel-dot')) {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-      }
-    }, true);
+    this.productUrl = this.dataset.productUrl;
+    
+    // Prevent all clicks on buttons and dots from propagating
+    const stopPropagation = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      return false;
+    };
     
     // Arrow navigation
     if (this.prevBtn) {
       this.prevBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
+        stopPropagation(e);
         this.prev();
-      }, true);
+      }, { capture: true });
+      
+      this.prevBtn.addEventListener('mousedown', stopPropagation, { capture: true });
+      this.prevBtn.addEventListener('mouseup', stopPropagation, { capture: true });
     }
     
     if (this.nextBtn) {
       this.nextBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
+        stopPropagation(e);
         this.next();
-      }, true);
+      }, { capture: true });
+      
+      this.nextBtn.addEventListener('mousedown', stopPropagation, { capture: true });
+      this.nextBtn.addEventListener('mouseup', stopPropagation, { capture: true });
     }
     
     // Dot navigation
     this.dots.forEach((dot, index) => {
       dot.addEventListener('click', (e) => {
+        stopPropagation(e);
+        this.goToSlide(index);
+      }, { capture: true });
+      
+      dot.addEventListener('mousedown', stopPropagation, { capture: true });
+      dot.addEventListener('mouseup', stopPropagation, { capture: true });
+    });
+    
+    // Click on image area navigates to product (only if not dragging)
+    this.slides.addEventListener('click', (e) => {
+      if (this.hasInteracted || this.isDragging) {
         e.preventDefault();
         e.stopPropagation();
-        e.stopImmediatePropagation();
-        this.goToSlide(index);
-      }, true);
+        this.hasInteracted = false;
+        return;
+      }
+      if (this.productUrl) {
+        window.location.href = this.productUrl;
+      }
     });
     
     // Touch events for mobile swipe
@@ -82,12 +99,14 @@ class CardCarousel extends HTMLElement {
     // Listen for transition end to handle infinite loop
     this.slides.addEventListener('transitionend', this.handleTransitionEnd.bind(this));
     
+    this.hasInteracted = false;
     this.updateButtons();
   }
   
   prev() {
     if (this.isTransitioning) return;
     
+    this.hasInteracted = true;
     this.isTransitioning = true;
     this.currentIndex--;
     
@@ -113,6 +132,7 @@ class CardCarousel extends HTMLElement {
   next() {
     if (this.isTransitioning) return;
     
+    this.hasInteracted = true;
     this.isTransitioning = true;
     this.currentIndex++;
     
@@ -138,6 +158,7 @@ class CardCarousel extends HTMLElement {
   goToSlide(index) {
     if (this.isTransitioning) return;
     
+    this.hasInteracted = true;
     this.isTransitioning = true;
     this.currentIndex = Math.max(0, Math.min(index, this.totalSlides - 1));
     this.updateSlidePosition();
@@ -222,6 +243,10 @@ class CardCarousel extends HTMLElement {
     
     const movedBy = this.currentTranslate - this.startTranslate;
     const threshold = this.slides.offsetWidth * 0.2;
+    
+    if (Math.abs(movedBy) > threshold) {
+      this.hasInteracted = true;
+    }
     
     if (movedBy < -threshold) {
       this.next();
