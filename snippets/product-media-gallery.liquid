@@ -107,8 +107,10 @@
           >
             {%- assign media_position = 1 -%}
             <div
-              class="product__media media gradient global-media-settings{% if section.settings.media_fit == 'contain' and media_count > 1 %} constrain-height{% endif %}"
-              style="padding-top: {{ 1 | divided_by: variant_featured_image.aspect_ratio | times: 100 }}%;"
+              class="product__media media gradient global-media-settings{% unless section.settings.media_fit == 'contain' %} media--{{ section.settings.media_fit }}{% endunless %}{% if section.settings.media_fit == 'contain' %} constrain-height{% endif %}"
+              {% if section.settings.media_fit == 'contain' %}
+                style="padding-top: {{ 1 | divided_by: variant_featured_image.aspect_ratio | times: 100 }}%;"
+              {% endif %}
             >
               <modal-opener class="product__modal-opener product__modal-opener--image" data-modal="#ProductModal-{{ section.id }}">
                 <span class="product__media-icon motion-reduce quick-add-hidden" aria-hidden="true">
@@ -135,7 +137,6 @@
                   loading="eager"
                   width="{{ variant_featured_image.width }}"
                   height="{{ variant_featured_image.height }}"
-                  class="{% if section.settings.media_fit == 'contain' %}object-contain{% else %}object-cover{% endif %}"
                 >
               </modal-opener>
             </div>
@@ -151,8 +152,10 @@
             >
               {%- assign media_position = media_position | plus: 1 -%}
               <div
-                class="product__media media gradient global-media-settings{% if section.settings.media_fit == 'contain' and media_count > 1 %} constrain-height{% endif %}"
-                style="padding-top: {{ 1 | divided_by: img.image.aspect_ratio | times: 100 }}%;"
+                class="product__media media gradient global-media-settings{% unless section.settings.media_fit == 'contain' %} media--{{ section.settings.media_fit }}{% endunless %}{% if section.settings.media_fit == 'contain' %} constrain-height{% endif %}"
+                {% if section.settings.media_fit == 'contain' %}
+                  style="padding-top: {{ 1 | divided_by: img.image.aspect_ratio | times: 100 }}%;"
+                {% endif %}
               >
                 <modal-opener class="product__modal-opener product__modal-opener--image" data-modal="#ProductModal-{{ section.id }}">
                   <span class="product__media-icon motion-reduce quick-add-hidden" aria-hidden="true">
@@ -179,7 +182,6 @@
                     loading="lazy"
                     width="{{ img.image.width }}"
                     height="{{ img.image.height }}"
-                    class="{% if section.settings.media_fit == 'contain' %}object-contain{% else %}object-cover{% endif %}"
                   >
                 </modal-opener>
               </div>
