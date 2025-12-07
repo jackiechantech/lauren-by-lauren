@@ -1,6 +1,6 @@
 /**
  * Card Image Carousel
- * Handles arrow navigation on desktop and swipe on mobile
+ * Handles arrow navigation on desktop and swipe on mobile with infinite loop
  */
 
 class CardCarousel extends HTMLElement {
@@ -14,6 +14,7 @@ class CardCarousel extends HTMLElement {
     
     this.currentIndex = 0;
     this.totalSlides = this.slideItems.length;
+    this.isInfinite = true; // Enable infinite scrolling
     
     // Touch/swipe variables
     this.touchStartX = 0;
@@ -21,6 +22,7 @@ class CardCarousel extends HTMLElement {
     this.isDragging = false;
     this.startTranslate = 0;
     this.currentTranslate = 0;
+    this.isTransitioning = false;
     
     this.init();
   }
@@ -59,28 +61,62 @@ class CardCarousel extends HTMLElement {
     this.slides.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
     this.slides.addEventListener('touchend', this.handleTouchEnd.bind(this));
     
-    // Mouse events for desktop drag (optional)
+    // Mouse events for desktop drag (optional on small screens)
     this.slides.addEventListener('mousedown', this.handleMouseDown.bind(this));
     this.slides.addEventListener('mousemove', this.handleMouseMove.bind(this));
     this.slides.addEventListener('mouseup', this.handleMouseUp.bind(this));
     this.slides.addEventListener('mouseleave', this.handleMouseUp.bind(this));
     
+    // Listen for transition end to handle infinite loop
+    this.slides.addEventListener('transitionend', this.handleTransitionEnd.bind(this));
+    
     this.updateButtons();
   }
   
   prev() {
-    if (this.currentIndex > 0) {
-      this.goToSlide(this.currentIndex - 1);
+    if (this.isTransitioning) return;
+    
+    this.isTransitioning = true;
+    this.currentIndex--;
+    
+    if (this.isInfinite && this.currentIndex < 0) {
+      // Jump to last slide
+      this.currentIndex = this.totalSlides - 1;
+    } else if (this.currentIndex < 0) {
+      this.currentIndex = 0;
+      this.isTransitioning = false;
+      return;
     }
+    
+    this.updateSlidePosition();
+    this.updateButtons();
+    this.updateDots();
   }
   
   next() {
-    if (this.currentIndex < this.totalSlides - 1) {
-      this.goToSlide(this.currentIndex + 1);
+    if (this.isTransitioning) return;
+    
+    this.isTransitioning = true;
+    this.currentIndex++;
+    
+    if (this.isInfinite && this.currentIndex >= this.totalSlides) {
+      // Jump to first slide
+      this.currentIndex = 0;
+    } else if (this.currentIndex >= this.totalSlides) {
+      this.currentIndex = this.totalSlides - 1;
+      this.isTransitioning = false;
+      return;
     }
+    
+    this.updateSlidePosition();
+    this.updateButtons();
+    this.updateDots();
   }
   
   goToSlide(index) {
+    if (this.isTransitioning) return;
+    
+    this.isTransitioning = true;
     this.currentIndex = Math.max(0, Math.min(index, this.totalSlides - 1));
     this.updateSlidePosition();
     this.updateButtons();
@@ -96,11 +132,13 @@ class CardCarousel extends HTMLElement {
   }
   
   updateButtons() {
-    if (this.prevBtn) {
-      this.prevBtn.disabled = this.currentIndex === 0;
-    }
-    if (this.nextBtn) {
-      this.nextBtn.disabled = this.currentIndex === this.totalSlides - 1;
+    // For infinite carousel, buttons are always enabled
+    if (this.isInfinite) {
+      if (this.prevBtn) this.prevBtn.disabled = false;
+      if (this.nextBtn) this.nextBtn.disabled = false;
+    } else {
+      if (this.prevBtn) this.prevBtn.disabled = this.currentIndex === 0;
+      if (this.nextBtn) this.nextBtn.disabled = this.currentIndex === this.totalSlides - 1;
     }
   }
   
@@ -110,12 +148,16 @@ class CardCarousel extends HTMLElement {
     });
   }
   
+  handleTransitionEnd() {
+    this.isTransitioning = false;
+  }
+  
   // Touch handlers
   handleTouchStart(e) {
     this.touchStartX = e.touches[0].clientX;
     this.isDragging = true;
     this.startTranslate = -this.currentIndex * this.slides.offsetWidth;
-    this.slides.classList.add('is-dragging');
+    this.slides.style.transition = 'none';
     this.classList.add('is-touching');
   }
   
@@ -126,17 +168,22 @@ class CardCarousel extends HTMLElement {
     const diff = currentX - this.touchStartX;
     this.currentTranslate = this.startTranslate + diff;
     
-    // Limit dragging at edges
-    const maxTranslate = 0;
-    const minTranslate = -(this.totalSlides - 1) * this.slides.offsetWidth;
-    
-    if (this.currentTranslate > maxTranslate) {
-      this.currentTranslate = maxTranslate + diff * 0.2;
-    } else if (this.currentTranslate < minTranslate) {
-      this.currentTranslate = minTranslate + (this.currentTranslate - minTranslate) * 0.2;
+    // For infinite carousel, allow dragging beyond edges
+    if (this.isInfinite) {
+      this.updateSlidePosition(this.currentTranslate);
+    } else {
+      // Limit dragging at edges for non-infinite
+      const maxTranslate = 0;
+      const minTranslate = -(this.totalSlides - 1) * this.slides.offsetWidth;
+      
+      if (this.currentTranslate > maxTranslate) {
+        this.currentTranslate = maxTranslate + diff * 0.2;
+      } else if (this.currentTranslate < minTranslate) {
+        this.currentTranslate = minTranslate + (this.currentTranslate - minTranslate) * 0.2;
+      }
+      
+      this.updateSlidePosition(this.currentTranslate);
     }
-    
-    this.updateSlidePosition(this.currentTranslate);
     
     // Prevent vertical scroll when swiping horizontally
     if (Math.abs(diff) > 10) {
@@ -148,32 +195,32 @@ class CardCarousel extends HTMLElement {
     if (!this.isDragging) return;
     
     this.isDragging = false;
-    this.slides.classList.remove('is-dragging');
+    this.slides.style.transition = '';
     this.classList.remove('is-touching');
     
     const movedBy = this.currentTranslate - this.startTranslate;
     const threshold = this.slides.offsetWidth * 0.2;
     
-    if (movedBy < -threshold && this.currentIndex < this.totalSlides - 1) {
-      this.currentIndex++;
-    } else if (movedBy > threshold && this.currentIndex > 0) {
-      this.currentIndex--;
+    if (movedBy < -threshold) {
+      this.next();
+    } else if (movedBy > threshold) {
+      this.prev();
+    } else {
+      // Snap back to current slide
+      this.updateSlidePosition();
     }
-    
-    this.updateSlidePosition();
-    this.updateButtons();
-    this.updateDots();
   }
   
-  // Mouse handlers (for desktop drag support)
+  // Mouse handlers (for desktop drag support on smaller screens)
   handleMouseDown(e) {
-    // Only on mobile-like behavior or if specifically wanted
+    // Only enable on smaller screens or if explicitly wanted
     if (window.innerWidth > 749) return;
     
     this.touchStartX = e.clientX;
     this.isDragging = true;
     this.startTranslate = -this.currentIndex * this.slides.offsetWidth;
-    this.slides.classList.add('is-dragging');
+    this.slides.style.transition = 'none';
+    e.preventDefault();
   }
   
   handleMouseMove(e) {
@@ -183,36 +230,38 @@ class CardCarousel extends HTMLElement {
     const diff = currentX - this.touchStartX;
     this.currentTranslate = this.startTranslate + diff;
     
-    const maxTranslate = 0;
-    const minTranslate = -(this.totalSlides - 1) * this.slides.offsetWidth;
-    
-    if (this.currentTranslate > maxTranslate) {
-      this.currentTranslate = maxTranslate + diff * 0.2;
-    } else if (this.currentTranslate < minTranslate) {
-      this.currentTranslate = minTranslate + (this.currentTranslate - minTranslate) * 0.2;
+    if (this.isInfinite) {
+      this.updateSlidePosition(this.currentTranslate);
+    } else {
+      const maxTranslate = 0;
+      const minTranslate = -(this.totalSlides - 1) * this.slides.offsetWidth;
+      
+      if (this.currentTranslate > maxTranslate) {
+        this.currentTranslate = maxTranslate + diff * 0.2;
+      } else if (this.currentTranslate < minTranslate) {
+        this.currentTranslate = minTranslate + (this.currentTranslate - minTranslate) * 0.2;
+      }
+      
+      this.updateSlidePosition(this.currentTranslate);
     }
-    
-    this.updateSlidePosition(this.currentTranslate);
   }
   
   handleMouseUp() {
     if (!this.isDragging || window.innerWidth > 749) return;
     
     this.isDragging = false;
-    this.slides.classList.remove('is-dragging');
+    this.slides.style.transition = '';
     
     const movedBy = this.currentTranslate - this.startTranslate;
     const threshold = this.slides.offsetWidth * 0.2;
     
-    if (movedBy < -threshold && this.currentIndex < this.totalSlides - 1) {
-      this.currentIndex++;
-    } else if (movedBy > threshold && this.currentIndex > 0) {
-      this.currentIndex--;
+    if (movedBy < -threshold) {
+      this.next();
+    } else if (movedBy > threshold) {
+      this.prev();
+    } else {
+      this.updateSlidePosition();
     }
-    
-    this.updateSlidePosition();
-    this.updateButtons();
-    this.updateDots();
   }
 }
 
