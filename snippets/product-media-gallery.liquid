@@ -94,20 +94,39 @@
             data-media-id="{{ section.id }}-variant-{{ current_variant.id }}"
           >
             {%- assign media_position = 1 -%}
-            {% render 'product-thumbnail',
-              media: variant_featured_image,
-              media_count: media_count,
-              position: media_position,
-              desktop_layout: section.settings.gallery_layout,
-              mobile_layout: section.settings.mobile_thumbnails,
-              loop: section.settings.enable_video_looping,
-              modal_id: section.id,
-              xr_button: true,
-              media_width: media_width,
-              media_fit: section.settings.media_fit,
-              constrain_to_viewport: section.settings.constrain_to_viewport,
-              lazy_load: false
-            %}
+            <div
+              class="product__media media gradient global-media-settings{% if section.settings.media_fit == 'contain' and media_count > 1 %} constrain-height{% endif %}"
+              style="padding-top: {{ 1 | divided_by: variant_featured_image.aspect_ratio | times: 100 }}%;"
+            >
+              <modal-opener class="product__modal-opener product__modal-opener--image" data-modal="#ProductModal-{{ section.id }}">
+                <span class="product__media-icon motion-reduce quick-add-hidden" aria-hidden="true">
+                  {{- 'icon-zoom.svg' | inline_asset_content -}}
+                </span>
+                <img
+                  srcset="
+                    {%- if variant_featured_image.width >= 493 -%}{{ variant_featured_image | image_url: width: 493 }} 493w,{%- endif -%}
+                    {%- if variant_featured_image.width >= 600 -%}{{ variant_featured_image | image_url: width: 600 }} 600w,{%- endif -%}
+                    {%- if variant_featured_image.width >= 713 -%}{{ variant_featured_image | image_url: width: 713 }} 713w,{%- endif -%}
+                    {%- if variant_featured_image.width >= 823 -%}{{ variant_featured_image | image_url: width: 823 }} 823w,{%- endif -%}
+                    {%- if variant_featured_image.width >= 990 -%}{{ variant_featured_image | image_url: width: 990 }} 990w,{%- endif -%}
+                    {%- if variant_featured_image.width >= 1100 -%}{{ variant_featured_image | image_url: width: 1100 }} 1100w,{%- endif -%}
+                    {%- if variant_featured_image.width >= 1206 -%}{{ variant_featured_image | image_url: width: 1206 }} 1206w,{%- endif -%}
+                    {%- if variant_featured_image.width >= 1346 -%}{{ variant_featured_image | image_url: width: 1346 }} 1346w,{%- endif -%}
+                    {%- if variant_featured_image.width >= 1426 -%}{{ variant_featured_image | image_url: width: 1426 }} 1426w,{%- endif -%}
+                    {%- if variant_featured_image.width >= 1646 -%}{{ variant_featured_image | image_url: width: 1646 }} 1646w,{%- endif -%}
+                    {%- if variant_featured_image.width >= 1946 -%}{{ variant_featured_image | image_url: width: 1946 }} 1946w,{%- endif -%}
+                    {{ variant_featured_image | image_url }} {{ variant_featured_image.width }}w
+                  "
+                  src="{{ variant_featured_image | image_url: width: 1946 }}"
+                  sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 100 | times: media_width | round }}px, (min-width: 990px) calc({{ media_width | times: 100 }}vw - 10rem), (min-width: 750px) calc((100vw - 11.5rem) / 2), calc(100vw - 4rem)"
+                  alt="{{ variant_featured_image.alt | default: product.title | escape }}"
+                  loading="eager"
+                  width="{{ variant_featured_image.width }}"
+                  height="{{ variant_featured_image.height }}"
+                  class="{% if section.settings.media_fit == 'contain' %}object-contain{% else %}object-cover{% endif %}"
+                >
+              </modal-opener>
+            </div>
           </li>
         {%- endif -%}
         {%- comment -%} Additional images from variant metafield {%- endcomment -%}
@@ -120,27 +139,37 @@
             >
               {%- assign media_position = media_position | plus: 1 -%}
               <div
-                class="product__media media global-media-settings gradient{% if media_count > 1 %} media--cropped{% endif %}"
-                style="--image-ratio: {{ 1 | divided_by: img.image.aspect_ratio }};"
+                class="product__media media gradient global-media-settings{% if section.settings.media_fit == 'contain' and media_count > 1 %} constrain-height{% endif %}"
+                style="padding-top: {{ 1 | divided_by: img.image.aspect_ratio | times: 100 }}%;"
               >
-                <img
-                  srcset="
-                    {%- if img.image.width >= 165 -%}{{ img.image | image_url: width: 165 }} 165w,{%- endif -%}
-                    {%- if img.image.width >= 360 -%}{{ img.image | image_url: width: 360 }} 360w,{%- endif -%}
-                    {%- if img.image.width >= 533 -%}{{ img.image | image_url: width: 533 }} 533w,{%- endif -%}
-                    {%- if img.image.width >= 720 -%}{{ img.image | image_url: width: 720 }} 720w,{%- endif -%}
-                    {%- if img.image.width >= 940 -%}{{ img.image | image_url: width: 940 }} 940w,{%- endif -%}
-                    {%- if img.image.width >= 1066 -%}{{ img.image | image_url: width: 1066 }} 1066w,{%- endif -%}
-                    {{ img.image | image_url }} {{ img.image.width }}w
-                  "
-                  src="{{ img.image | image_url: width: 940 }}"
-                  sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 100 | times: media_width | round }}px, (min-width: 990px) calc({{ media_width | times: 100 }}vw - 10rem), (min-width: 750px) calc((100vw - 11.5rem) / 2), calc(100vw - 4rem)"
-                  alt="{{ img.image.alt | default: product.title | escape }}"
-                  loading="lazy"
-                  width="{{ img.image.width }}"
-                  height="{{ img.image.height }}"
-                  class="{% if section.settings.media_fit == 'contain' %}object-contain{% else %}object-cover{% endif %}"
-                >
+                <modal-opener class="product__modal-opener product__modal-opener--image" data-modal="#ProductModal-{{ section.id }}">
+                  <span class="product__media-icon motion-reduce quick-add-hidden" aria-hidden="true">
+                    {{- 'icon-zoom.svg' | inline_asset_content -}}
+                  </span>
+                  <img
+                    srcset="
+                      {%- if img.image.width >= 493 -%}{{ img.image | image_url: width: 493 }} 493w,{%- endif -%}
+                      {%- if img.image.width >= 600 -%}{{ img.image | image_url: width: 600 }} 600w,{%- endif -%}
+                      {%- if img.image.width >= 713 -%}{{ img.image | image_url: width: 713 }} 713w,{%- endif -%}
+                      {%- if img.image.width >= 823 -%}{{ img.image | image_url: width: 823 }} 823w,{%- endif -%}
+                      {%- if img.image.width >= 990 -%}{{ img.image | image_url: width: 990 }} 990w,{%- endif -%}
+                      {%- if img.image.width >= 1100 -%}{{ img.image | image_url: width: 1100 }} 1100w,{%- endif -%}
+                      {%- if img.image.width >= 1206 -%}{{ img.image | image_url: width: 1206 }} 1206w,{%- endif -%}
+                      {%- if img.image.width >= 1346 -%}{{ img.image | image_url: width: 1346 }} 1346w,{%- endif -%}
+                      {%- if img.image.width >= 1426 -%}{{ img.image | image_url: width: 1426 }} 1426w,{%- endif -%}
+                      {%- if img.image.width >= 1646 -%}{{ img.image | image_url: width: 1646 }} 1646w,{%- endif -%}
+                      {%- if img.image.width >= 1946 -%}{{ img.image | image_url: width: 1946 }} 1946w,{%- endif -%}
+                      {{ img.image | image_url }} {{ img.image.width }}w
+                    "
+                    src="{{ img.image | image_url: width: 1946 }}"
+                    sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 100 | times: media_width | round }}px, (min-width: 990px) calc({{ media_width | times: 100 }}vw - 10rem), (min-width: 750px) calc((100vw - 11.5rem) / 2), calc(100vw - 4rem)"
+                    alt="{{ img.image.alt | default: product.title | escape }}"
+                    loading="lazy"
+                    width="{{ img.image.width }}"
+                    height="{{ img.image.height }}"
+                    class="{% if section.settings.media_fit == 'contain' %}object-contain{% else %}object-cover{% endif %}"
+                  >
+                </modal-opener>
               </div>
             </li>
           {%- endfor -%}
