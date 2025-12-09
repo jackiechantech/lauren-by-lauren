@@ -78,77 +78,8 @@
       >
         {%- if variant_image -%}
           <div class="card__media{% if image_shape and image_shape != 'default' %} shape--{{ image_shape }} color-{{ settings.card_color_scheme }} gradient{% endif %}">
-            {%- if has_additional_images -%}
-              {%- comment -%} Carousel with variant featured image + additional images from metafield {%- endcomment -%}
-              <card-carousel class="card__media-carousel" data-product-url="{{ variant_url }}">
-                <div class="media media--transparent">
-                  <div class="card__media-slides">
-                    {%- comment -%} First slide: variant's featured image {%- endcomment -%}
-                    <div class="card__media-slide">
-                      <img
-                        srcset="
-                          {%- if variant_image.width >= 165 -%}{{ variant_image | image_url: width: 165 }} 165w,{%- endif -%}
-                          {%- if variant_image.width >= 360 -%}{{ variant_image | image_url: width: 360 }} 360w,{%- endif -%}
-                          {%- if variant_image.width >= 533 -%}{{ variant_image | image_url: width: 533 }} 533w,{%- endif -%}
-                          {%- if variant_image.width >= 720 -%}{{ variant_image | image_url: width: 720 }} 720w,{%- endif -%}
-                          {%- if variant_image.width >= 940 -%}{{ variant_image | image_url: width: 940 }} 940w,{%- endif -%}
-                          {%- if variant_image.width >= 1066 -%}{{ variant_image | image_url: width: 1066 }} 1066w,{%- endif -%}
-                          {{ variant_image | image_url }} {{ variant_image.width }}w
-                        "
-                        src="{{ variant_image | image_url: width: 533 }}"
-                        sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
-                        alt="{{ variant_image.alt | default: variant_title | escape }}"
-                        class="motion-reduce"
-                        {% unless lazy_load == false %}loading="lazy"{% endunless %}
-                        width="{{ variant_image.width }}"
-                        height="{{ variant_image.height }}"
-                      >
-                    </div>
-                    {%- comment -%} Additional slides from metafield {%- endcomment -%}
-                    {%- for img in additional_images -%}
-                      <div class="card__media-slide">
-                        <img
-                          srcset="
-                            {%- if img.image.width >= 165 -%}{{ img.image | image_url: width: 165 }} 165w,{%- endif -%}
-                            {%- if img.image.width >= 360 -%}{{ img.image | image_url: width: 360 }} 360w,{%- endif -%}
-                            {%- if img.image.width >= 533 -%}{{ img.image | image_url: width: 533 }} 533w,{%- endif -%}
-                            {%- if img.image.width >= 720 -%}{{ img.image | image_url: width: 720 }} 720w,{%- endif -%}
-                            {%- if img.image.width >= 940 -%}{{ img.image | image_url: width: 940 }} 940w,{%- endif -%}
-                            {%- if img.image.width >= 1066 -%}{{ img.image | image_url: width: 1066 }} 1066w,{%- endif -%}
-                            {{ img.image | image_url }} {{ img.image.width }}w
-                          "
-                          src="{{ img.image | image_url: width: 533 }}"
-                          sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
-                          alt="{{ img.image.alt | default: variant_title | escape }}"
-                          class="motion-reduce"
-                          loading="lazy"
-                          width="{{ img.image.width }}"
-                          height="{{ img.image.height }}"
-                        >
-                      </div>
-                    {%- endfor -%}
-                  </div>
-                </div>
-                <button type="button" class="card__carousel-nav card__carousel-nav--prev" aria-label="{{ 'accessibility.previous_slide' | t }}">
-                  <svg viewBox="0 0 14 10" fill="none" aria-hidden="true" focusable="false">
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M8.537.808a.5.5 0 01.817-.162l4 4a.5.5 0 010 .708l-4 4a.5.5 0 11-.708-.708L11.793 5.5H1a.5.5 0 010-1h10.793L8.646 1.354a.5.5 0 01-.109-.546z" fill="currentColor" transform="scale(-1, 1) translate(-14, 0)"></path>
-                  </svg>
-                </button>
-                <button type="button" class="card__carousel-nav card__carousel-nav--next" aria-label="{{ 'accessibility.next_slide' | t }}">
-                  <svg viewBox="0 0 14 10" fill="none" aria-hidden="true" focusable="false">
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M8.537.808a.5.5 0 01.817-.162l4 4a.5.5 0 010 .708l-4 4a.5.5 0 11-.708-.708L11.793 5.5H1a.5.5 0 010-1h10.793L8.646 1.354a.5.5 0 01-.109-.546z" fill="currentColor"></path>
-                  </svg>
-                </button>
-                <div class="card__carousel-dots">
-                  <button type="button" class="card__carousel-dot is-active" aria-label="{{ 'accessibility.go_to_slide' | t: num: 1 }}"></button>
-                  {%- for img in additional_images -%}
-                    <button type="button" class="card__carousel-dot" aria-label="{{ 'accessibility.go_to_slide' | t: num: forloop.index | plus: 1 }}"></button>
-                  {%- endfor -%}
-                </div>
-              </card-carousel>
-            {%- else -%}
-              {%- comment -%} Single image, no carousel {%- endcomment -%}
-              <div class="media media--transparent media--hover-effect">
+            <div class="media media--transparent media--hover-effect">
+              <a href="{{ variant_url }}" class="full-unstyled-link" tabindex="-1">
                 <img
                   srcset="
                     {%- if variant_image.width >= 165 -%}{{ variant_image | image_url: width: 165 }} 165w,{%- endif -%}
@@ -169,8 +100,8 @@
                   width="{{ variant_image.width }}"
                   height="{{ variant_image.height }}"
                 >
-              </div>
-            {%- endif -%}
+              </a>
+            </div>
           </div>
         {%- endif -%}
         <div class="card__content">
