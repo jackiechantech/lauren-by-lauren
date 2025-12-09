@@ -77,23 +77,24 @@
     data-section-id="{{ section.id }}"
   {% endif %}
 >
-  {%- if show_variants_separately -%}
-    <script src="{{ 'variant-gallery-updater.js' | asset_url }}" defer="defer"></script>
-  {%- endif -%}
+  {{ 'component-product-carousel.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'component-product-carousel.js' | asset_url }}" defer="defer"></script>
   {%- if show_variants_separately -%}
     <script src="{{ 'variant-gallery-updater.js' | asset_url }}" defer="defer"></script>
   {%- endif -%}
   <div id="GalleryStatus-{{ section.id }}" class="visually-hidden" role="status"></div>
-  <slider-component id="GalleryViewer-{{ section.id }}" class="slider-mobile-gutter">
-    <a class="skip-to-content-link button visually-hidden quick-add-hidden" href="#ProductInfo-{{ section.id }}">
-      {{ 'accessibility.skip_to_product_info' | t }}
-    </a>
-    <ul
-      id="Slider-Gallery-{{ section.id }}"
-      class="product__media-list contains-media grid grid--peek list-unstyled slider slider--mobile"
-      role="list"
-      {% if show_variants_separately %}data-variant-gallery="true"{% endif %}
-    >
+  <product-carousel id="ProductCarousel-{{ section.id }}" class="product-carousel" data-section-id="{{ section.id }}">
+    <slider-component id="GalleryViewer-{{ section.id }}" class="slider-mobile-gutter">
+      <a class="skip-to-content-link button visually-hidden quick-add-hidden" href="#ProductInfo-{{ section.id }}">
+        {{ 'accessibility.skip_to_product_info' | t }}
+      </a>
+      <div class="product-carousel__container">
+        <ul
+          id="Slider-Gallery-{{ section.id }}"
+          class="product__media-list product-carousel__slides contains-media list-unstyled"
+          role="list"
+          {% if show_variants_separately %}data-variant-gallery="true"{% endif %}
+        >
       {%- if show_variants_separately -%}
         {%- comment -%} Variant-specific gallery: show only variant image + metafield images {%- endcomment -%}
         {%- comment -%} Find the variant's image object from product.media {%- endcomment -%}
@@ -112,7 +113,7 @@
         {%- if variant_featured_image != null -%}
           <li
             id="Slide-{{ section.id }}-variant-{{ current_variant.id }}"
-            class="product__media-item grid__item slider__slide is-active{% if single_media_visible %} product__media-item--single{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}"
+            class="product__media-item product-carousel__slide{% if forloop.first %} is-active{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}"
             data-media-id="{{ section.id }}-variant-{{ current_variant.id }}"
           >
             {%- assign media_position = 1 -%}
@@ -167,7 +168,7 @@
           {%- for img in variant_gallery_images -%}
             <li
               id="Slide-{{ section.id }}-variant-gallery-{{ forloop.index }}"
-              class="product__media-item grid__item slider__slide{% if single_media_visible %} product__media-item--single{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}"
+              class="product__media-item product-carousel__slide{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}"
               data-media-id="{{ section.id }}-variant-gallery-{{ forloop.index }}"
             >
               {%- assign media_position = media_position | plus: 1 -%}
@@ -224,7 +225,7 @@
           {%- assign featured_media = product.selected_or_first_available_variant.featured_media -%}
           <li
             id="Slide-{{ section.id }}-{{ featured_media.id }}"
-            class="product__media-item grid__item slider__slide is-active{% if single_media_visible %} product__media-item--single{% endif %}{% if featured_media.media_type != 'image' %} product__media-item--full{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}"
+            class="product__media-item product-carousel__slide is-active{% if featured_media.media_type != 'image' %} product__media-item--full{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}"
             data-media-id="{{ section.id }}-{{ featured_media.id }}"
           >
             {%- assign media_position = 1 -%}
@@ -256,7 +257,7 @@
           {%- unless media.id == product.selected_or_first_available_variant.featured_media.id -%}
             <li
               id="Slide-{{ section.id }}-{{ media.id }}"
-              class="product__media-item grid__item slider__slide{% if single_media_visible %} product__media-item--single{% endif %}{% if product.selected_or_first_available_variant.featured_media == nil and forloop.index == 1 %} is-active{% endif %}{% if media.media_type != 'image' %} product__media-item--full{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}"
+              class="product__media-item product-carousel__slide{% if product.selected_or_first_available_variant.featured_media == nil and forloop.index == 1 %} is-active{% endif %}{% if media.media_type != 'image' %} product__media-item--full{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}"
               data-media-id="{{ section.id }}-{{ media.id }}"
             >
               {%- liquid
@@ -284,36 +285,27 @@
           {%- endunless -%}
         {%- endfor -%}
       {%- endif -%}
-    </ul>
-    <div class="slider-buttons quick-add-hidden{% if hide_mobile_slider %} small-hide{% endif %}">
-      <button
-        type="button"
-        class="slider-button slider-button--prev"
-        name="previous"
-        aria-label="{{ 'general.slider.previous_slide' | t }}"
-      >
-        <span class="svg-wrapper">
-          {{- 'icon-caret.svg' | inline_asset_content -}}
-        </span>
-      </button>
-      <div class="slider-counter caption">
-        <span class="slider-counter--current">1</span>
-        <span aria-hidden="true"> / </span>
-        <span class="visually-hidden">{{ 'general.slider.of' | t }}</span>
-        <span class="slider-counter--total">{{ media_count }}</span>
+        </ul>
+        {%- if media_count > 1 -%}
+          <button type="button" class="product-carousel__nav product-carousel__nav--prev" aria-label="{{ 'accessibility.previous_slide' | t }}">
+            <svg viewBox="0 0 14 10" fill="none" aria-hidden="true" focusable="false">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M8.537.808a.5.5 0 01.817-.162l4 4a.5.5 0 010 .708l-4 4a.5.5 0 11-.708-.708L11.793 5.5H1a.5.5 0 010-1h10.793L8.646 1.354a.5.5 0 01-.109-.546z" fill="currentColor" transform="scale(-1, 1) translate(-14, 0)"></path>
+            </svg>
+          </button>
+          <button type="button" class="product-carousel__nav product-carousel__nav--next" aria-label="{{ 'accessibility.next_slide' | t }}">
+            <svg viewBox="0 0 14 10" fill="none" aria-hidden="true" focusable="false">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M8.537.808a.5.5 0 01.817-.162l4 4a.5.5 0 010 .708l-4 4a.5.5 0 11-.708-.708L11.793 5.5H1a.5.5 0 010-1h10.793L8.646 1.354a.5.5 0 01-.109-.546z" fill="currentColor"></path>
+            </svg>
+          </button>
+          <div class="product-carousel__dots">
+            {%- for i in (1..media_count) -%}
+              <button type="button" class="product-carousel__dot{% if forloop.first %} is-active{% endif %}" aria-label="{{ 'accessibility.go_to_slide' | t: num: forloop.index }}"></button>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
       </div>
-      <button
-        type="button"
-        class="slider-button slider-button--next"
-        name="next"
-        aria-label="{{ 'general.slider.next_slide' | t }}"
-      >
-        <span class="svg-wrapper">
-          {{- 'icon-caret.svg' | inline_asset_content -}}
-        </span>
-      </button>
-    </div>
-  </slider-component>
+    </slider-component>
+  </product-carousel>
   {%- if first_3d_model -%}
     <button
       class="button button--full-width product__xr-button"
