@@ -98,11 +98,10 @@ class ProductCarousel extends HTMLElement {
 
   cleanup() {
     console.log('[ProductCarousel] cleanup() called');
-    // Remove old event listeners
-    const carouselContainer = this.querySelector('.product-carousel__container') || this;
+    // Remove old event listeners - use 'this' (the carousel element) as it's stable
     if (this.boundHandlers.delegatedClick) {
-      console.log('[ProductCarousel] Removing delegated click listener');
-      carouselContainer.removeEventListener('click', this.boundHandlers.delegatedClick);
+      console.log('[ProductCarousel] Removing delegated click listener from carousel element');
+      this.removeEventListener('click', this.boundHandlers.delegatedClick);
     }
     if (this.prevBtn && this.boundHandlers.prevHover) {
       this.prevBtn.removeEventListener('mouseenter', this.boundHandlers.prevHover);
@@ -204,20 +203,25 @@ class ProductCarousel extends HTMLElement {
     // Set initial active slide
     this.setActiveSlide(this.currentIndex);
 
-    // Arrow navigation - use event delegation on the carousel container
+    // Arrow navigation - use event delegation on the carousel element itself
     // This ensures clicks work even if buttons are replaced
-    const carouselContainer = this.querySelector('.product-carousel__container') || this;
-    
-    // Remove old delegated listeners if they exist
-    if (this.boundHandlers.delegatedClick) {
-      carouselContainer.removeEventListener('click', this.boundHandlers.delegatedClick);
-    }
+    // Use 'this' (the carousel custom element) as it's the most stable parent
     
     // Create delegated click handler
     this.boundHandlers.delegatedClick = (e) => {
-      const target = e.target.closest('.product-carousel__nav--prev, .product-carousel__nav--next');
-      if (!target) return;
+      console.log('[ProductCarousel] Delegated click detected, target:', e.target);
+      console.log('[ProductCarousel] Target classes:', e.target.className);
+      console.log('[ProductCarousel] Target tagName:', e.target.tagName);
       
+      const target = e.target.closest('.product-carousel__nav--prev, .product-carousel__nav--next');
+      console.log('[ProductCarousel] Closest nav button:', target);
+      
+      if (!target) {
+        console.log('[ProductCarousel] Click was not on a nav button, ignoring');
+        return;
+      }
+      
+      console.log('[ProductCarousel] Nav button found, checking which one...');
       if (target.classList.contains('product-carousel__nav--prev')) {
         console.log('[ProductCarousel] Prev button clicked (delegated), currentIndex:', this.currentIndex);
         e.preventDefault();
@@ -228,11 +232,21 @@ class ProductCarousel extends HTMLElement {
         e.preventDefault();
         e.stopPropagation();
         this.next();
+      } else {
+        console.log('[ProductCarousel] Button found but class check failed');
       }
     };
     
-    carouselContainer.addEventListener('click', this.boundHandlers.delegatedClick, { capture: false, passive: false });
-    console.log('[ProductCarousel] Event delegation set up on container');
+    // Attach listener to the carousel element itself (most stable)
+    this.addEventListener('click', this.boundHandlers.delegatedClick, { capture: false, passive: false });
+    console.log('[ProductCarousel] Event delegation set up on carousel element:', this);
+    console.log('[ProductCarousel] Carousel element ID:', this.id);
+    console.log('[ProductCarousel] Handler attached:', !!this.boundHandlers.delegatedClick);
+    
+    // Test: verify buttons exist
+    const testPrev = this.querySelector('.product-carousel__nav--prev');
+    const testNext = this.querySelector('.product-carousel__nav--next');
+    console.log('[ProductCarousel] Buttons exist after setup - prev:', !!testPrev, 'next:', !!testNext);
     
     // Also attach direct listeners for hover preloading
     if (this.prevBtn) {
