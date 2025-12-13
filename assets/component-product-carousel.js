@@ -322,6 +322,11 @@ class ProductCarousel extends HTMLElement {
 
   setActiveSlide(index) {
     console.log('[ProductCarousel] setActiveSlide() called with index:', index);
+    
+    // Always refresh slidesContainer reference - it might have been replaced after DOM updates
+    this.slidesContainer = this.querySelector('.product-carousel__slides') || 
+                          this.querySelector('.product__media-list');
+    
     if (!this.slidesContainer) {
       console.warn('[ProductCarousel] setActiveSlide: slidesContainer is null!');
       return;
@@ -335,6 +340,7 @@ class ProductCarousel extends HTMLElement {
     }
     
     console.log('[ProductCarousel] setActiveSlide: slideItems.length:', this.slideItems.length);
+    console.log('[ProductCarousel] setActiveSlide: slidesContainer element:', this.slidesContainer);
     
     // Ensure index is within bounds
     if (index < 0 || index >= this.slideItems.length) {
@@ -346,6 +352,7 @@ class ProductCarousel extends HTMLElement {
     const transform = `translateX(-${index * 100}%)`;
     console.log('[ProductCarousel] setActiveSlide: Applying transform:', transform);
     this.slidesContainer.style.transform = transform;
+    console.log('[ProductCarousel] setActiveSlide: Transform applied, computed style:', window.getComputedStyle(this.slidesContainer).transform);
 
     // Remove active class from all slides
     this.slideItems.forEach((slide, i) => {
