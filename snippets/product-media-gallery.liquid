@@ -154,7 +154,8 @@
                     sizes="{{ sizes }}"
                     alt="{{ variant_featured_image.alt | default: product.title | escape }}"
                     class="image-magnify-{{ section.settings.image_zoom }}"
-                    {% unless lazy_load == false %}loading="lazy"{% endunless %}
+                    loading="eager"
+                    fetchpriority="high"
                     width="{{ variant_featured_image.width }}"
                     height="{{ variant_featured_image.height }}"
                   >
@@ -210,6 +211,7 @@
                       alt="{{ img.image.alt | default: product.title | escape }}"
                       class="image-magnify-{{ section.settings.image_zoom }}"
                       loading="lazy"
+                      decoding="async"
                       width="{{ img.image.width }}"
                       height="{{ img.image.height }}"
                     >

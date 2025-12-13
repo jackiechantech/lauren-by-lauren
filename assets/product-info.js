@@ -305,10 +305,20 @@ if (!customElements.get('product-info')) {
         );
 
         // Reinitialize product carousel after DOM updates
-        const productCarousel = this.querySelector('product-carousel');
-        if (productCarousel && typeof productCarousel.reinitialize === 'function') {
-          productCarousel.reinitialize();
-        }
+        // Use requestAnimationFrame to ensure DOM is fully updated and rendered
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            // Try multiple ways to find the carousel
+            const productCarousel = 
+              this.querySelector(`product-carousel`) ||
+              this.querySelector(`#ProductCarousel-${this.dataset.section}`) ||
+              document.querySelector(`#ProductCarousel-${this.dataset.section}`);
+            
+            if (productCarousel && typeof productCarousel.reinitialize === 'function') {
+              productCarousel.reinitialize();
+            }
+          });
+        });
 
         // update media modal
         const modalContent = this.productModal?.querySelector(`.product-media-modal__content`);
