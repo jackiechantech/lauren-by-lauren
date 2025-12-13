@@ -210,19 +210,37 @@ class ProductCarousel extends HTMLElement {
     // Arrow navigation - bind and store handlers
     if (this.prevBtn) {
       console.log('[ProductCarousel] Setting up prev button');
-      // Remove any existing listeners first
-      const newPrevBtn = this.prevBtn.cloneNode(true);
-      this.prevBtn.parentNode.replaceChild(newPrevBtn, this.prevBtn);
-      this.prevBtn = newPrevBtn;
+      console.log('[ProductCarousel] Prev button element:', this.prevBtn);
+      console.log('[ProductCarousel] Prev button parent:', this.prevBtn.parentNode);
+      
+      // Remove any existing listeners first by cloning
+      const oldPrevBtn = this.prevBtn;
+      const newPrevBtn = oldPrevBtn.cloneNode(true);
+      if (oldPrevBtn.parentNode) {
+        oldPrevBtn.parentNode.replaceChild(newPrevBtn, oldPrevBtn);
+        this.prevBtn = newPrevBtn;
+        console.log('[ProductCarousel] Prev button replaced, new element:', this.prevBtn);
+      } else {
+        console.warn('[ProductCarousel] Prev button has no parent, cannot replace');
+      }
       
       this.boundHandlers.prevClick = (e) => {
         console.log('[ProductCarousel] Prev button clicked, currentIndex:', this.currentIndex);
+        console.log('[ProductCarousel] Prev click - event:', e);
+        console.log('[ProductCarousel] Prev click - button element:', e.target);
         e.preventDefault();
         e.stopPropagation();
         this.prev();
       };
-      this.prevBtn.addEventListener('click', this.boundHandlers.prevClick);
-      console.log('[ProductCarousel] Prev button event listener attached');
+      this.prevBtn.addEventListener('click', this.boundHandlers.prevClick, { capture: false });
+      console.log('[ProductCarousel] Prev button event listener attached, handler:', typeof this.boundHandlers.prevClick);
+      console.log('[ProductCarousel] Prev button disabled?', this.prevBtn.disabled);
+      console.log('[ProductCarousel] Prev button style.display:', this.prevBtn.style.display);
+      
+      // Test if button is clickable
+      this.prevBtn.addEventListener('mousedown', () => {
+        console.log('[ProductCarousel] Prev button mousedown detected');
+      });
 
       // Preload on hover for faster navigation
       this.boundHandlers.prevHover = () => {
@@ -241,19 +259,37 @@ class ProductCarousel extends HTMLElement {
 
     if (this.nextBtn) {
       console.log('[ProductCarousel] Setting up next button');
-      // Remove any existing listeners first
-      const newNextBtn = this.nextBtn.cloneNode(true);
-      this.nextBtn.parentNode.replaceChild(newNextBtn, this.nextBtn);
-      this.nextBtn = newNextBtn;
+      console.log('[ProductCarousel] Next button element:', this.nextBtn);
+      console.log('[ProductCarousel] Next button parent:', this.nextBtn.parentNode);
+      
+      // Remove any existing listeners first by cloning
+      const oldNextBtn = this.nextBtn;
+      const newNextBtn = oldNextBtn.cloneNode(true);
+      if (oldNextBtn.parentNode) {
+        oldNextBtn.parentNode.replaceChild(newNextBtn, oldNextBtn);
+        this.nextBtn = newNextBtn;
+        console.log('[ProductCarousel] Next button replaced, new element:', this.nextBtn);
+      } else {
+        console.warn('[ProductCarousel] Next button has no parent, cannot replace');
+      }
       
       this.boundHandlers.nextClick = (e) => {
         console.log('[ProductCarousel] Next button clicked, currentIndex:', this.currentIndex);
+        console.log('[ProductCarousel] Next click - event:', e);
+        console.log('[ProductCarousel] Next click - button element:', e.target);
         e.preventDefault();
         e.stopPropagation();
         this.next();
       };
-      this.nextBtn.addEventListener('click', this.boundHandlers.nextClick);
-      console.log('[ProductCarousel] Next button event listener attached');
+      this.nextBtn.addEventListener('click', this.boundHandlers.nextClick, { capture: false });
+      console.log('[ProductCarousel] Next button event listener attached, handler:', typeof this.boundHandlers.nextClick);
+      console.log('[ProductCarousel] Next button disabled?', this.nextBtn.disabled);
+      console.log('[ProductCarousel] Next button style.display:', this.nextBtn.style.display);
+      
+      // Test if button is clickable
+      this.nextBtn.addEventListener('mousedown', () => {
+        console.log('[ProductCarousel] Next button mousedown detected');
+      });
 
       // Preload on hover for faster navigation
       this.boundHandlers.nextHover = () => {
