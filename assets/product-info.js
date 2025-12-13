@@ -304,6 +304,12 @@ if (!customElements.get('product-info')) {
           true
         );
 
+        // Reinitialize product carousel after DOM updates
+        const productCarousel = this.querySelector('product-carousel');
+        if (productCarousel && typeof productCarousel.reinitialize === 'function') {
+          productCarousel.reinitialize();
+        }
+
         // update media modal
         const modalContent = this.productModal?.querySelector(`.product-media-modal__content`);
         const newModalContent = html.querySelector(`product-modal .product-media-modal__content`);

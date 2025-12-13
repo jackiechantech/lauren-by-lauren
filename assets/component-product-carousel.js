@@ -6,14 +6,14 @@
 class ProductCarousel extends HTMLElement {
   constructor() {
     super();
-    this.slidesContainer = this.querySelector('.product-carousel__slides');
-    this.slideItems = this.querySelectorAll('.product-carousel__slide');
-    this.prevBtn = this.querySelector('.product-carousel__nav--prev');
-    this.nextBtn = this.querySelector('.product-carousel__nav--next');
-    this.dots = this.querySelectorAll('.product-carousel__dot');
+    this.slidesContainer = null;
+    this.slideItems = null;
+    this.prevBtn = null;
+    this.nextBtn = null;
+    this.dots = null;
 
     this.currentIndex = 0;
-    this.totalSlides = this.slideItems.length;
+    this.totalSlides = 0;
     this.isInfinite = true;
 
     // Touch/swipe variables
@@ -24,10 +24,83 @@ class ProductCarousel extends HTMLElement {
     this.currentTranslate = 0;
     this.isTransitioning = false;
 
+    // Store bound handlers for cleanup
+    this.boundHandlers = {
+      prevClick: null,
+      nextClick: null,
+      dotClicks: [],
+      touchStart: null,
+      touchMove: null,
+      touchEnd: null,
+      mouseDown: null,
+      mouseMove: null,
+      mouseUp: null,
+      mouseLeave: null
+    };
+
     this.init();
   }
 
+  cleanup() {
+    // Remove old event listeners
+    if (this.prevBtn && this.boundHandlers.prevClick) {
+      this.prevBtn.removeEventListener('click', this.boundHandlers.prevClick);
+    }
+    if (this.nextBtn && this.boundHandlers.nextClick) {
+      this.nextBtn.removeEventListener('click', this.boundHandlers.nextClick);
+    }
+    if (this.dots && this.boundHandlers.dotClicks.length > 0) {
+      this.dots.forEach((dot, index) => {
+        if (this.boundHandlers.dotClicks[index]) {
+          dot.removeEventListener('click', this.boundHandlers.dotClicks[index]);
+        }
+      });
+    }
+    if (this.slidesContainer) {
+      if (this.boundHandlers.touchStart) {
+        this.slidesContainer.removeEventListener('touchstart', this.boundHandlers.touchStart);
+      }
+      if (this.boundHandlers.touchMove) {
+        this.slidesContainer.removeEventListener('touchmove', this.boundHandlers.touchMove);
+      }
+      if (this.boundHandlers.touchEnd) {
+        this.slidesContainer.removeEventListener('touchend', this.boundHandlers.touchEnd);
+      }
+      if (this.boundHandlers.mouseDown) {
+        this.slidesContainer.removeEventListener('mousedown', this.boundHandlers.mouseDown);
+      }
+      if (this.boundHandlers.mouseMove) {
+        this.slidesContainer.removeEventListener('mousemove', this.boundHandlers.mouseMove);
+      }
+      if (this.boundHandlers.mouseUp) {
+        this.slidesContainer.removeEventListener('mouseup', this.boundHandlers.mouseUp);
+      }
+      if (this.boundHandlers.mouseLeave) {
+        this.slidesContainer.removeEventListener('mouseleave', this.boundHandlers.mouseLeave);
+      }
+    }
+    // Clear handlers array
+    this.boundHandlers.dotClicks = [];
+  }
+
   init() {
+    // Clean up old listeners first
+    this.cleanup();
+
+    // Refresh DOM references
+    this.slidesContainer = this.querySelector('.product-carousel__slides');
+    this.slideItems = this.querySelectorAll('.product-carousel__slide');
+    this.prevBtn = this.querySelector('.product-carousel__nav--prev');
+    this.nextBtn = this.querySelector('.product-carousel__nav--next');
+    this.dots = this.querySelectorAll('.product-carousel__dot');
+
+    this.totalSlides = this.slideItems.length;
+
+    // Reset current index if it's out of bounds
+    if (this.currentIndex >= this.totalSlides) {
+      this.currentIndex = 0;
+    }
+
     if (this.totalSlides <= 1) {
       // Hide navigation if only one slide
       if (this.prevBtn) this.prevBtn.style.display = 'none';
@@ -39,49 +112,72 @@ class ProductCarousel extends HTMLElement {
       return;
     }
 
+    // Show navigation if hidden
+    if (this.prevBtn) this.prevBtn.style.display = '';
+    if (this.nextBtn) this.nextBtn.style.display = '';
+    const dotsContainer = this.querySelector('.product-carousel__dots');
+    if (dotsContainer) dotsContainer.style.display = '';
+
     // Set initial active slide
     this.setActiveSlide(this.currentIndex);
 
-    // Arrow navigation
+    // Arrow navigation - bind and store handlers
     if (this.prevBtn) {
-      this.prevBtn.addEventListener('click', (e) => {
+      this.boundHandlers.prevClick = (e) => {
         e.preventDefault();
         e.stopPropagation();
         this.prev();
-      });
+      };
+      this.prevBtn.addEventListener('click', this.boundHandlers.prevClick);
     }
 
     if (this.nextBtn) {
-      this.nextBtn.addEventListener('click', (e) => {
+      this.boundHandlers.nextClick = (e) => {
         e.preventDefault();
         e.stopPropagation();
         this.next();
-      });
+      };
+      this.nextBtn.addEventListener('click', this.boundHandlers.nextClick);
     }
 
-    // Dot navigation
+    // Dot navigation - bind and store handlers
     this.dots.forEach((dot, index) => {
-      dot.addEventListener('click', (e) => {
+      const handler = (e) => {
         e.preventDefault();
         e.stopPropagation();
         this.goToSlide(index);
-      });
+      };
+      this.boundHandlers.dotClicks[index] = handler;
+      dot.addEventListener('click', handler);
     });
 
-    // Touch events for mobile swipe
+    // Touch events for mobile swipe - bind and store handlers
     if (this.slidesContainer) {
-      this.slidesContainer.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: true });
-      this.slidesContainer.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
-      this.slidesContainer.addEventListener('touchend', this.handleTouchEnd.bind(this));
+      this.boundHandlers.touchStart = this.handleTouchStart.bind(this);
+      this.boundHandlers.touchMove = this.handleTouchMove.bind(this);
+      this.boundHandlers.touchEnd = this.handleTouchEnd.bind(this);
+      this.boundHandlers.mouseDown = this.handleMouseDown.bind(this);
+      this.boundHandlers.mouseMove = this.handleMouseMove.bind(this);
+      this.boundHandlers.mouseUp = this.handleMouseUp.bind(this);
+      this.boundHandlers.mouseLeave = this.handleMouseUp.bind(this);
 
-      // Mouse events for desktop drag (optional on small screens)
-      this.slidesContainer.addEventListener('mousedown', this.handleMouseDown.bind(this));
-      this.slidesContainer.addEventListener('mousemove', this.handleMouseMove.bind(this));
-      this.slidesContainer.addEventListener('mouseup', this.handleMouseUp.bind(this));
-      this.slidesContainer.addEventListener('mouseleave', this.handleMouseUp.bind(this));
+      this.slidesContainer.addEventListener('touchstart', this.boundHandlers.touchStart, { passive: true });
+      this.slidesContainer.addEventListener('touchmove', this.boundHandlers.touchMove, { passive: false });
+      this.slidesContainer.addEventListener('touchend', this.boundHandlers.touchEnd);
+      this.slidesContainer.addEventListener('mousedown', this.boundHandlers.mouseDown);
+      this.slidesContainer.addEventListener('mousemove', this.boundHandlers.mouseMove);
+      this.slidesContainer.addEventListener('mouseup', this.boundHandlers.mouseUp);
+      this.slidesContainer.addEventListener('mouseleave', this.boundHandlers.mouseLeave);
     }
 
     this.updateButtons();
+  }
+
+  reinitialize() {
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+    this.isDragging = false;
+    this.init();
   }
 
   setActiveSlide(index) {
