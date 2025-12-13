@@ -38,6 +38,41 @@
 
 <div class="section-{{ section.id }}-padding gradient color-{{ section.settings.color_scheme }}">
   {%- paginate collection.products by section.settings.products_per_page -%}
+    {%- comment -%} Calculate total variant count for products that show variants separately {%- endcomment -%}
+    {%- liquid
+      assign total_variant_count = 0
+      assign total_all_variant_count = 0
+      
+      for product in collection.products
+        assign show_variants_separately = false
+        assign metafield_value = product.metafields.custom.show_variants_separately.value | default: product.metafields.custom.show_variants_separately
+        if metafield_value == true
+          assign show_variants_separately = true
+        endif
+        if show_variants_separately and product.variants.size > 1
+          assign total_variant_count = total_variant_count | plus: product.variants.size
+        else
+          assign total_variant_count = total_variant_count | plus: 1
+        endif
+      endfor
+      
+      if collection.all_products
+        for product in collection.all_products
+          assign show_variants_separately = false
+          assign metafield_value = product.metafields.custom.show_variants_separately.value | default: product.metafields.custom.show_variants_separately
+          if metafield_value == true
+            assign show_variants_separately = true
+          endif
+          if show_variants_separately and product.variants.size > 1
+            assign total_all_variant_count = total_all_variant_count | plus: product.variants.size
+          else
+            assign total_all_variant_count = total_all_variant_count | plus: 1
+          endif
+        endfor
+      else
+        assign total_all_variant_count = total_variant_count
+      endif
+    -%}
     {% comment %} Sort is the first tabbable element when filter type is vertical {% endcomment %}
     {%- if section.settings.enable_sorting and section.settings.filter_type == 'vertical' -%}
       <facet-filters-form class="facets facets-vertical-sort page-width small-hide">
@@ -81,12 +116,12 @@
                     'templates.search.results_with_count'
                     | t: terms: collection.terms, count: collection.results_count
                   }}
-                {%- elsif collection.products_count == collection.all_products_count -%}
-                  {{ 'products.facets.product_count_simple' | t: count: collection.products_count }}
+                {%- elsif total_variant_count == total_all_variant_count -%}
+                  {{ 'products.facets.product_count_simple' | t: count: total_variant_count }}
                 {%- else -%}
                   {{
                     'products.facets.product_count'
-                    | t: product_count: collection.products_count, count: collection.all_products_count
+                    | t: product_count: total_variant_count, count: total_all_variant_count
                   }}
                 {%- endif -%}
               </span>

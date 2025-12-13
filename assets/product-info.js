@@ -175,6 +175,7 @@ if (!customElements.get('product-info')) {
             return;
           }
 
+          console.log('[ProductInfo] handleUpdateProductInfo - calling updateMedia with variant:', variant?.id, 'featured_media:', variant?.featured_media?.id);
           this.updateMedia(html, variant?.featured_media?.id);
 
           const updateSourceFromDestination = (id, shouldHide = (source) => false) => {
@@ -240,10 +241,18 @@ if (!customElements.get('product-info')) {
       }
 
       updateMedia(html, variantFeaturedMediaId) {
-        if (!variantFeaturedMediaId) return;
+        console.log('[ProductInfo] updateMedia() started');
+        if (!variantFeaturedMediaId) {
+          console.log('[ProductInfo] updateMedia() - no variantFeaturedMediaId, returning');
+          return;
+        }
 
         const mediaGallerySource = this.querySelector('media-gallery ul');
         const mediaGalleryDestination = html.querySelector(`media-gallery ul`);
+        console.log('[ProductInfo] updateMedia() - DOM elements:', {
+          mediaGallerySource: !!mediaGallerySource,
+          mediaGalleryDestination: !!mediaGalleryDestination
+        });
 
         const refreshSourceData = () => {
           if (this.hasAttribute('data-zoom-on-hover')) enableZoomOnHover(2);
@@ -298,24 +307,47 @@ if (!customElements.get('product-info')) {
           });
         }
 
+        console.log('[ProductInfo] updateMedia() called for variant:', variantFeaturedMediaId);
+        console.log('[ProductInfo] Section ID:', this.dataset.section);
+        
         // set featured media as active in the media gallery
-        this.querySelector(`media-gallery`)?.setActiveMedia?.(
-          `${this.dataset.section}-${variantFeaturedMediaId}`,
-          true
-        );
+        const mediaGallery = this.querySelector(`media-gallery`);
+        console.log('[ProductInfo] Media gallery found:', !!mediaGallery);
+        if (mediaGallery) {
+          const mediaId = `${this.dataset.section}-${variantFeaturedMediaId}`;
+          console.log('[ProductInfo] Calling setActiveMedia with mediaId:', mediaId);
+          mediaGallery.setActiveMedia?.(mediaId, true);
+        }
 
         // Reinitialize product carousel after DOM updates
         // Use requestAnimationFrame to ensure DOM is fully updated and rendered
+        console.log('[ProductInfo] Scheduling carousel reinitialize...');
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
+            console.log('[ProductInfo] Attempting to find carousel...');
             // Try multiple ways to find the carousel
             const productCarousel = 
               this.querySelector(`product-carousel`) ||
               this.querySelector(`#ProductCarousel-${this.dataset.section}`) ||
               document.querySelector(`#ProductCarousel-${this.dataset.section}`);
             
-            if (productCarousel && typeof productCarousel.reinitialize === 'function') {
-              productCarousel.reinitialize();
+            console.log('[ProductInfo] Carousel found:', !!productCarousel);
+            if (productCarousel) {
+              console.log('[ProductInfo] Carousel element:', productCarousel);
+              console.log('[ProductInfo] Has reinitialize method:', typeof productCarousel.reinitialize === 'function');
+              if (typeof productCarousel.reinitialize === 'function') {
+                console.log('[ProductInfo] Calling carousel.reinitialize()...');
+                productCarousel.reinitialize();
+                console.log('[ProductInfo] Carousel reinitialize() called');
+              } else {
+                console.error('[ProductInfo] Carousel does not have reinitialize method!');
+              }
+            } else {
+              console.error('[ProductInfo] Carousel not found! Tried:', {
+                querySelector: !!this.querySelector(`product-carousel`),
+                querySelectorId: !!this.querySelector(`#ProductCarousel-${this.dataset.section}`),
+                documentQuerySelector: !!document.querySelector(`#ProductCarousel-${this.dataset.section}`)
+              });
             }
           });
         });

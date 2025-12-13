@@ -868,6 +868,41 @@
       </form>
     </facet-filters-form>
   {%- endif -%}
+  {%- comment -%} Calculate total variant count for products that show variants separately {%- endcomment -%}
+  {%- liquid
+    assign total_variant_count = 0
+    assign total_all_variant_count = 0
+    
+    for product in results.products
+      assign show_variants_separately = false
+      assign metafield_value = product.metafields.custom.show_variants_separately.value | default: product.metafields.custom.show_variants_separately
+      if metafield_value == true
+        assign show_variants_separately = true
+      endif
+      if show_variants_separately and product.variants.size > 1
+        assign total_variant_count = total_variant_count | plus: product.variants.size
+      else
+        assign total_variant_count = total_variant_count | plus: 1
+      endif
+    endfor
+    
+    if results.all_products
+      for product in results.all_products
+        assign show_variants_separately = false
+        assign metafield_value = product.metafields.custom.show_variants_separately.value | default: product.metafields.custom.show_variants_separately
+        if metafield_value == true
+          assign show_variants_separately = true
+        endif
+        if show_variants_separately and product.variants.size > 1
+          assign total_all_variant_count = total_all_variant_count | plus: product.variants.size
+        else
+          assign total_all_variant_count = total_all_variant_count | plus: 1
+        endif
+      endfor
+    else
+      assign total_all_variant_count = total_variant_count
+    endif
+  -%}
   <div
     class="product-count light{% if filter_type == 'vertical' or filter_type == 'horizontal' %} medium-hide large-up-hide{% endif %}"
     role="status"
@@ -876,12 +911,12 @@
       <span id="ProductCount">
         {%- if results.results_count -%}
           {{ 'templates.search.results_with_count' | t: terms: results.terms, count: results.results_count }}
-        {%- elsif results.products_count == results.all_products_count -%}
-          {{ 'products.facets.product_count_simple' | t: count: results.products_count }}
+        {%- elsif total_variant_count == total_all_variant_count -%}
+          {{ 'products.facets.product_count_simple' | t: count: total_variant_count }}
         {%- else -%}
           {{
             'products.facets.product_count'
-            | t: product_count: results.products_count, count: results.all_products_count
+            | t: product_count: total_variant_count, count: total_all_variant_count
           }}
         {%- endif -%}
       </span>

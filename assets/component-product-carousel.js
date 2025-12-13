@@ -6,6 +6,8 @@
 class ProductCarousel extends HTMLElement {
   constructor() {
     super();
+    console.log('[ProductCarousel] constructor() called');
+    console.log('[ProductCarousel] Element ID:', this.id);
     this.slidesContainer = null;
     this.slideItems = null;
     this.prevBtn = null;
@@ -94,9 +96,11 @@ class ProductCarousel extends HTMLElement {
   }
 
   cleanup() {
+    console.log('[ProductCarousel] cleanup() called');
     // Remove old event listeners
     if (this.prevBtn) {
       if (this.boundHandlers.prevClick) {
+        console.log('[ProductCarousel] Removing prev button click listener');
         this.prevBtn.removeEventListener('click', this.boundHandlers.prevClick);
       }
       if (this.boundHandlers.prevHover) {
@@ -105,6 +109,7 @@ class ProductCarousel extends HTMLElement {
     }
     if (this.nextBtn) {
       if (this.boundHandlers.nextClick) {
+        console.log('[ProductCarousel] Removing next button click listener');
         this.nextBtn.removeEventListener('click', this.boundHandlers.nextClick);
       }
       if (this.boundHandlers.nextHover) {
@@ -146,6 +151,7 @@ class ProductCarousel extends HTMLElement {
   }
 
   init() {
+    console.log('[ProductCarousel] init() called');
     // Clean up old listeners first
     this.cleanup();
 
@@ -157,12 +163,22 @@ class ProductCarousel extends HTMLElement {
     this.nextBtn = this.querySelector('.product-carousel__nav--next');
     this.dots = this.querySelectorAll('.product-carousel__dot');
 
+    console.log('[ProductCarousel] DOM elements found:', {
+      slidesContainer: !!this.slidesContainer,
+      slideItemsCount: this.slideItems.length,
+      prevBtn: !!this.prevBtn,
+      nextBtn: !!this.nextBtn,
+      dotsCount: this.dots.length
+    });
+
     // If no slides found with the class, try alternative selector
     if (this.slideItems.length === 0 && this.slidesContainer) {
       this.slideItems = this.slidesContainer.querySelectorAll('li.product__media-item');
+      console.log('[ProductCarousel] Using alternative selector, found slides:', this.slideItems.length);
     }
 
     this.totalSlides = this.slideItems.length;
+    console.log('[ProductCarousel] Total slides:', this.totalSlides);
 
     // Reset current index if it's out of bounds
     if (this.currentIndex >= this.totalSlides) {
@@ -170,6 +186,7 @@ class ProductCarousel extends HTMLElement {
     }
 
     if (this.totalSlides <= 1) {
+      console.log('[ProductCarousel] Only one slide, hiding navigation');
       // Hide navigation if only one slide
       if (this.prevBtn) this.prevBtn.style.display = 'none';
       if (this.nextBtn) this.nextBtn.style.display = 'none';
@@ -186,22 +203,26 @@ class ProductCarousel extends HTMLElement {
     const dotsContainer = this.querySelector('.product-carousel__dots');
     if (dotsContainer) dotsContainer.style.display = '';
 
+    console.log('[ProductCarousel] Setting initial active slide:', this.currentIndex);
     // Set initial active slide
     this.setActiveSlide(this.currentIndex);
 
     // Arrow navigation - bind and store handlers
     if (this.prevBtn) {
+      console.log('[ProductCarousel] Setting up prev button');
       // Remove any existing listeners first
       const newPrevBtn = this.prevBtn.cloneNode(true);
       this.prevBtn.parentNode.replaceChild(newPrevBtn, this.prevBtn);
       this.prevBtn = newPrevBtn;
       
       this.boundHandlers.prevClick = (e) => {
+        console.log('[ProductCarousel] Prev button clicked, currentIndex:', this.currentIndex);
         e.preventDefault();
         e.stopPropagation();
         this.prev();
       };
       this.prevBtn.addEventListener('click', this.boundHandlers.prevClick);
+      console.log('[ProductCarousel] Prev button event listener attached');
 
       // Preload on hover for faster navigation
       this.boundHandlers.prevHover = () => {
@@ -214,20 +235,25 @@ class ProductCarousel extends HTMLElement {
         }
       };
       this.prevBtn.addEventListener('mouseenter', this.boundHandlers.prevHover);
+    } else {
+      console.warn('[ProductCarousel] Prev button not found!');
     }
 
     if (this.nextBtn) {
+      console.log('[ProductCarousel] Setting up next button');
       // Remove any existing listeners first
       const newNextBtn = this.nextBtn.cloneNode(true);
       this.nextBtn.parentNode.replaceChild(newNextBtn, this.nextBtn);
       this.nextBtn = newNextBtn;
       
       this.boundHandlers.nextClick = (e) => {
+        console.log('[ProductCarousel] Next button clicked, currentIndex:', this.currentIndex);
         e.preventDefault();
         e.stopPropagation();
         this.next();
       };
       this.nextBtn.addEventListener('click', this.boundHandlers.nextClick);
+      console.log('[ProductCarousel] Next button event listener attached');
 
       // Preload on hover for faster navigation
       this.boundHandlers.nextHover = () => {
@@ -240,6 +266,8 @@ class ProductCarousel extends HTMLElement {
         }
       };
       this.nextBtn.addEventListener('mouseenter', this.boundHandlers.nextHover);
+    } else {
+      console.warn('[ProductCarousel] Next button not found!');
     }
 
     // Dot navigation - bind and store handlers
@@ -276,28 +304,41 @@ class ProductCarousel extends HTMLElement {
   }
 
   reinitialize() {
+    console.log('[ProductCarousel] reinitialize() called');
+    console.log('[ProductCarousel] Before reinit - currentIndex:', this.currentIndex, 'totalSlides:', this.totalSlides);
     this.currentIndex = 0;
     this.isTransitioning = false;
     this.isDragging = false;
     this.init();
+    console.log('[ProductCarousel] After reinit - currentIndex:', this.currentIndex, 'totalSlides:', this.totalSlides);
   }
 
   setActiveSlide(index) {
-    if (!this.slidesContainer) return;
+    console.log('[ProductCarousel] setActiveSlide() called with index:', index);
+    if (!this.slidesContainer) {
+      console.warn('[ProductCarousel] setActiveSlide: slidesContainer is null!');
+      return;
+    }
 
     // Refresh slideItems reference to ensure we have the latest DOM elements
     this.slideItems = this.querySelectorAll('.product-carousel__slide');
     if (this.slideItems.length === 0 && this.slidesContainer) {
       this.slideItems = this.slidesContainer.querySelectorAll('li.product__media-item');
+      console.log('[ProductCarousel] setActiveSlide: Using alternative selector, found:', this.slideItems.length);
     }
+    
+    console.log('[ProductCarousel] setActiveSlide: slideItems.length:', this.slideItems.length);
     
     // Ensure index is within bounds
     if (index < 0 || index >= this.slideItems.length) {
+      console.warn('[ProductCarousel] setActiveSlide: Index out of bounds!', { index, length: this.slideItems.length });
       return;
     }
 
     // Update transform for sliding effect
-    this.slidesContainer.style.transform = `translateX(-${index * 100}%)`;
+    const transform = `translateX(-${index * 100}%)`;
+    console.log('[ProductCarousel] setActiveSlide: Applying transform:', transform);
+    this.slidesContainer.style.transform = transform;
 
     // Remove active class from all slides
     this.slideItems.forEach((slide, i) => {
@@ -312,6 +353,7 @@ class ProductCarousel extends HTMLElement {
 
     this.currentIndex = index;
     this.totalSlides = this.slideItems.length;
+    console.log('[ProductCarousel] setActiveSlide: Updated currentIndex to', this.currentIndex, 'totalSlides:', this.totalSlides);
 
     // Preload adjacent slides for smoother navigation
     if (this.preloadAdjacent) {
@@ -322,7 +364,11 @@ class ProductCarousel extends HTMLElement {
   }
 
   prev() {
-    if (this.isTransitioning) return;
+    console.log('[ProductCarousel] prev() called, isTransitioning:', this.isTransitioning, 'currentIndex:', this.currentIndex);
+    if (this.isTransitioning) {
+      console.log('[ProductCarousel] prev() blocked - already transitioning');
+      return;
+    }
 
     this.isTransitioning = true;
     this.currentIndex--;
@@ -332,19 +378,26 @@ class ProductCarousel extends HTMLElement {
     } else if (this.currentIndex < 0) {
       this.currentIndex = 0;
       this.isTransitioning = false;
+      console.log('[ProductCarousel] prev() - at beginning, cannot go back');
       return;
     }
 
+    console.log('[ProductCarousel] prev() - new index:', this.currentIndex);
     this.setActiveSlide(this.currentIndex);
     this.updateButtons();
 
     setTimeout(() => {
       this.isTransitioning = false;
+      console.log('[ProductCarousel] prev() - transition complete');
     }, 300);
   }
 
   next() {
-    if (this.isTransitioning) return;
+    console.log('[ProductCarousel] next() called, isTransitioning:', this.isTransitioning, 'currentIndex:', this.currentIndex);
+    if (this.isTransitioning) {
+      console.log('[ProductCarousel] next() blocked - already transitioning');
+      return;
+    }
 
     this.isTransitioning = true;
     this.currentIndex++;
@@ -354,14 +407,17 @@ class ProductCarousel extends HTMLElement {
     } else if (this.currentIndex >= this.totalSlides) {
       this.currentIndex = this.totalSlides - 1;
       this.isTransitioning = false;
+      console.log('[ProductCarousel] next() - at end, cannot go forward');
       return;
     }
 
+    console.log('[ProductCarousel] next() - new index:', this.currentIndex);
     this.setActiveSlide(this.currentIndex);
     this.updateButtons();
 
     setTimeout(() => {
       this.isTransitioning = false;
+      console.log('[ProductCarousel] next() - transition complete');
     }, 300);
   }
 
