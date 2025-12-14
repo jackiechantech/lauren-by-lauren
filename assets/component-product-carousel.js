@@ -6,8 +6,6 @@
 class ProductCarousel extends HTMLElement {
   constructor() {
     super();
-    console.log('[ProductCarousel] constructor() called');
-    console.log('[ProductCarousel] Element ID:', this.id);
     this.slidesContainer = null;
     this.slideItems = null;
     this.prevBtn = null;
@@ -97,10 +95,7 @@ class ProductCarousel extends HTMLElement {
   }
 
   cleanup() {
-    console.log('[ProductCarousel] cleanup() called');
-    // Remove old event listeners - use 'this' (the carousel element) as it's stable
     if (this.boundHandlers.delegatedClick) {
-      console.log('[ProductCarousel] Removing delegated click listener from carousel element');
       this.removeEventListener('click', this.boundHandlers.delegatedClick);
     }
     if (this.prevBtn && this.boundHandlers.prevHover) {
@@ -144,11 +139,8 @@ class ProductCarousel extends HTMLElement {
   }
 
   init() {
-    console.log('[ProductCarousel] init() called');
-    // Clean up old listeners first
     this.cleanup();
 
-    // Refresh DOM references - try multiple selectors to be safe
     this.slidesContainer = this.querySelector('.product-carousel__slides') || 
                           this.querySelector('.product__media-list');
     this.slideItems = this.querySelectorAll('.product-carousel__slide');
@@ -156,25 +148,11 @@ class ProductCarousel extends HTMLElement {
     this.nextBtn = this.querySelector('.product-carousel__nav--next');
     this.dots = this.querySelectorAll('.product-carousel__dot');
 
-    console.log('[ProductCarousel] DOM elements found:', {
-      slidesContainer: !!this.slidesContainer,
-      slideItemsCount: this.slideItems.length,
-      prevBtn: !!this.prevBtn,
-      nextBtn: !!this.nextBtn,
-      dotsCount: this.dots.length
-    });
-
-    // Don't clone buttons here - we'll use event delegation instead
-    // Cloning can cause issues if buttons are replaced by other code
-
-    // If no slides found with the class, try alternative selector
     if (this.slideItems.length === 0 && this.slidesContainer) {
       this.slideItems = this.slidesContainer.querySelectorAll('li.product__media-item');
-      console.log('[ProductCarousel] Using alternative selector, found slides:', this.slideItems.length);
     }
 
     this.totalSlides = this.slideItems.length;
-    console.log('[ProductCarousel] Total slides:', this.totalSlides);
 
     // Reset current index if it's out of bounds
     if (this.currentIndex >= this.totalSlides) {
@@ -182,8 +160,6 @@ class ProductCarousel extends HTMLElement {
     }
 
     if (this.totalSlides <= 1) {
-      console.log('[ProductCarousel] Only one slide, hiding navigation');
-      // Hide navigation if only one slide
       if (this.prevBtn) this.prevBtn.style.display = 'none';
       if (this.nextBtn) this.nextBtn.style.display = 'none';
       if (this.dots.length > 0) {
@@ -193,64 +169,34 @@ class ProductCarousel extends HTMLElement {
       return;
     }
 
-    // Show navigation if hidden
     if (this.prevBtn) this.prevBtn.style.display = '';
     if (this.nextBtn) this.nextBtn.style.display = '';
     const dotsContainer = this.querySelector('.product-carousel__dots');
     if (dotsContainer) dotsContainer.style.display = '';
 
-    console.log('[ProductCarousel] Setting initial active slide:', this.currentIndex);
-    // Set initial active slide
     this.setActiveSlide(this.currentIndex);
 
-    // Arrow navigation - use event delegation on the carousel element itself
-    // This ensures clicks work even if buttons are replaced
-    // Use 'this' (the carousel custom element) as it's the most stable parent
-    
-    // Create delegated click handler
     this.boundHandlers.delegatedClick = (e) => {
-      console.log('[ProductCarousel] Delegated click detected, target:', e.target);
-      console.log('[ProductCarousel] Target classes:', e.target.className);
-      console.log('[ProductCarousel] Target tagName:', e.target.tagName);
-      
       const target = e.target.closest('.product-carousel__nav--prev, .product-carousel__nav--next');
-      console.log('[ProductCarousel] Closest nav button:', target);
       
       if (!target) {
-        console.log('[ProductCarousel] Click was not on a nav button, ignoring');
         return;
       }
       
-      console.log('[ProductCarousel] Nav button found, checking which one...');
       if (target.classList.contains('product-carousel__nav--prev')) {
-        console.log('[ProductCarousel] Prev button clicked (delegated), currentIndex:', this.currentIndex);
         e.preventDefault();
         e.stopPropagation();
         this.prev();
       } else if (target.classList.contains('product-carousel__nav--next')) {
-        console.log('[ProductCarousel] Next button clicked (delegated), currentIndex:', this.currentIndex);
         e.preventDefault();
         e.stopPropagation();
         this.next();
-      } else {
-        console.log('[ProductCarousel] Button found but class check failed');
       }
     };
     
-    // Attach listener to the carousel element itself (most stable)
     this.addEventListener('click', this.boundHandlers.delegatedClick, { capture: false, passive: false });
-    console.log('[ProductCarousel] Event delegation set up on carousel element:', this);
-    console.log('[ProductCarousel] Carousel element ID:', this.id);
-    console.log('[ProductCarousel] Handler attached:', !!this.boundHandlers.delegatedClick);
     
-    // Test: verify buttons exist
-    const testPrev = this.querySelector('.product-carousel__nav--prev');
-    const testNext = this.querySelector('.product-carousel__nav--next');
-    console.log('[ProductCarousel] Buttons exist after setup - prev:', !!testPrev, 'next:', !!testNext);
-    
-    // Also attach direct listeners for hover preloading
     if (this.prevBtn) {
-      console.log('[ProductCarousel] Setting up prev button hover');
       this.boundHandlers.prevHover = () => {
         const prevIndex = this.isInfinite 
           ? (this.currentIndex - 1 + this.totalSlides) % this.totalSlides 
@@ -264,7 +210,6 @@ class ProductCarousel extends HTMLElement {
     }
     
     if (this.nextBtn) {
-      console.log('[ProductCarousel] Setting up next button hover');
       this.boundHandlers.nextHover = () => {
         const nextIndex = this.isInfinite 
           ? (this.currentIndex + 1) % this.totalSlides 
@@ -311,48 +256,31 @@ class ProductCarousel extends HTMLElement {
   }
 
   reinitialize() {
-    console.log('[ProductCarousel] reinitialize() called');
-    console.log('[ProductCarousel] Before reinit - currentIndex:', this.currentIndex, 'totalSlides:', this.totalSlides);
     this.currentIndex = 0;
     this.isTransitioning = false;
     this.isDragging = false;
     this.init();
-    console.log('[ProductCarousel] After reinit - currentIndex:', this.currentIndex, 'totalSlides:', this.totalSlides);
   }
 
   setActiveSlide(index) {
-    console.log('[ProductCarousel] setActiveSlide() called with index:', index);
-    
-    // Always refresh slidesContainer reference - it might have been replaced after DOM updates
     this.slidesContainer = this.querySelector('.product-carousel__slides') || 
                           this.querySelector('.product__media-list');
     
     if (!this.slidesContainer) {
-      console.warn('[ProductCarousel] setActiveSlide: slidesContainer is null!');
       return;
     }
 
-    // Refresh slideItems reference to ensure we have the latest DOM elements
     this.slideItems = this.querySelectorAll('.product-carousel__slide');
     if (this.slideItems.length === 0 && this.slidesContainer) {
       this.slideItems = this.slidesContainer.querySelectorAll('li.product__media-item');
-      console.log('[ProductCarousel] setActiveSlide: Using alternative selector, found:', this.slideItems.length);
     }
     
-    console.log('[ProductCarousel] setActiveSlide: slideItems.length:', this.slideItems.length);
-    console.log('[ProductCarousel] setActiveSlide: slidesContainer element:', this.slidesContainer);
-    
-    // Ensure index is within bounds
     if (index < 0 || index >= this.slideItems.length) {
-      console.warn('[ProductCarousel] setActiveSlide: Index out of bounds!', { index, length: this.slideItems.length });
       return;
     }
 
-    // Update transform for sliding effect
     const transform = `translateX(-${index * 100}%)`;
-    console.log('[ProductCarousel] setActiveSlide: Applying transform:', transform);
     this.slidesContainer.style.transform = transform;
-    console.log('[ProductCarousel] setActiveSlide: Transform applied, computed style:', window.getComputedStyle(this.slidesContainer).transform);
 
     // Remove active class from all slides
     this.slideItems.forEach((slide, i) => {
@@ -367,9 +295,7 @@ class ProductCarousel extends HTMLElement {
 
     this.currentIndex = index;
     this.totalSlides = this.slideItems.length;
-    console.log('[ProductCarousel] setActiveSlide: Updated currentIndex to', this.currentIndex, 'totalSlides:', this.totalSlides);
 
-    // Preload adjacent slides for smoother navigation
     if (this.preloadAdjacent) {
       requestAnimationFrame(() => {
         this.preloadAdjacentSlides();
@@ -378,9 +304,7 @@ class ProductCarousel extends HTMLElement {
   }
 
   prev() {
-    console.log('[ProductCarousel] prev() called, isTransitioning:', this.isTransitioning, 'currentIndex:', this.currentIndex);
     if (this.isTransitioning) {
-      console.log('[ProductCarousel] prev() blocked - already transitioning');
       return;
     }
 
@@ -392,24 +316,19 @@ class ProductCarousel extends HTMLElement {
     } else if (this.currentIndex < 0) {
       this.currentIndex = 0;
       this.isTransitioning = false;
-      console.log('[ProductCarousel] prev() - at beginning, cannot go back');
       return;
     }
 
-    console.log('[ProductCarousel] prev() - new index:', this.currentIndex);
     this.setActiveSlide(this.currentIndex);
     this.updateButtons();
 
     setTimeout(() => {
       this.isTransitioning = false;
-      console.log('[ProductCarousel] prev() - transition complete');
     }, 300);
   }
 
   next() {
-    console.log('[ProductCarousel] next() called, isTransitioning:', this.isTransitioning, 'currentIndex:', this.currentIndex);
     if (this.isTransitioning) {
-      console.log('[ProductCarousel] next() blocked - already transitioning');
       return;
     }
 
@@ -421,17 +340,14 @@ class ProductCarousel extends HTMLElement {
     } else if (this.currentIndex >= this.totalSlides) {
       this.currentIndex = this.totalSlides - 1;
       this.isTransitioning = false;
-      console.log('[ProductCarousel] next() - at end, cannot go forward');
       return;
     }
 
-    console.log('[ProductCarousel] next() - new index:', this.currentIndex);
     this.setActiveSlide(this.currentIndex);
     this.updateButtons();
 
     setTimeout(() => {
       this.isTransitioning = false;
-      console.log('[ProductCarousel] next() - transition complete');
     }, 300);
   }
 
