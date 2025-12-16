@@ -104,13 +104,25 @@
                   {%- liquid
                     assign second_image = null
                     assign variant_gallery_images = card_variant.metafields.custom.variant_gallery.value | default: blank
-                    if variant_gallery_images != blank and variant_gallery_images.size > 0
-                      assign gallery_item = variant_gallery_images[0]
-                      if gallery_item.image != null
-                        assign second_image = gallery_item.image
+                    assign debug_info = 'show_secondary_image: ' | append: show_secondary_image | append: ', gallery_exists: '
+                    if variant_gallery_images != blank
+                      assign debug_info = debug_info | append: 'yes, size: ' | append: variant_gallery_images.size
+                      if variant_gallery_images.size > 0
+                        assign gallery_item = variant_gallery_images[0]
+                        if gallery_item.image != null
+                          assign second_image = gallery_item.image
+                          assign debug_info = debug_info | append: ', second_image: found'
+                        else
+                          assign debug_info = debug_info | append: ', second_image: gallery_item.image is null'
+                        endif
+                      else
+                        assign debug_info = debug_info | append: ', gallery empty'
                       endif
+                    else
+                      assign debug_info = debug_info | append: 'no'
                     endif
                   -%}
+                  <!-- DEBUG: {{ debug_info }} -->
                   {%- if second_image != null and second_image != blank -%}
                     <img
                       srcset="
@@ -129,8 +141,13 @@
                       loading="lazy"
                       width="{{ second_image.width }}"
                       height="{{ second_image.height }}"
+                      data-debug="second-image-rendered"
                     >
+                  {%- else -%}
+                    <!-- DEBUG: Second image not rendered - second_image is null or blank -->
                   {%- endif -%}
+                {%- else -%}
+                  <!-- DEBUG: show_secondary_image is false -->
                 {%- endif -%}
               </a>
             </div>
