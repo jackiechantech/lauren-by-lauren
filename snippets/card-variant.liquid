@@ -103,12 +103,15 @@
                 {%- if show_secondary_image -%}
                   {%- liquid
                     assign second_image = null
-                    assign additional_images = card_variant.metafields.custom.variant_gallery.value | default: blank
-                    if additional_images != blank and additional_images.size > 0
-                      assign second_image = additional_images[0]
+                    assign variant_gallery_images = card_variant.metafields.custom.variant_gallery.value | default: blank
+                    if variant_gallery_images != blank and variant_gallery_images.size > 0
+                      assign gallery_item = variant_gallery_images[0]
+                      if gallery_item.image != null
+                        assign second_image = gallery_item.image
+                      endif
                     endif
                   -%}
-                  {%- if second_image != null -%}
+                  {%- if second_image != null and second_image != blank -%}
                     <img
                       srcset="
                         {%- if second_image.width >= 165 -%}{{ second_image | image_url: width: 165 }} 165w,{%- endif -%}
