@@ -105,21 +105,41 @@
                     assign second_image = null
                     assign variant_gallery_images = card_variant.metafields.custom.variant_gallery.value | default: blank
                     assign debug_info = 'show_secondary_image: ' | append: show_secondary_image | append: ', gallery_exists: '
-                    if variant_gallery_images != blank
-                      assign debug_info = debug_info | append: 'yes, size: ' | append: variant_gallery_images.size
-                      if variant_gallery_images.size > 0
-                        assign gallery_item = variant_gallery_images[0]
-                        if gallery_item.image != null
-                          assign second_image = gallery_item.image
-                          assign debug_info = debug_info | append: ', second_image: found'
-                        else
-                          assign debug_info = debug_info | append: ', second_image: gallery_item.image is null'
+                    if variant_gallery_images != blank and variant_gallery_images.size > 0
+                      assign debug_info = debug_info | append: 'yes, size: ' | append: variant_gallery_images.size | append: ', trying: '
+                      for img in variant_gallery_images limit: 1
+                        comment
+                          Try img.image first (as used in product-media-modal)
+                        endcomment
+                        if img.image != null and img.image != blank
+                          assign second_image = img.image
+                          assign debug_info = debug_info | append: 'img.image found'
+                          break
+                        elsif img != null and img != blank
+                          comment
+                            Check if img itself is an image object (has width property)
+                          endcomment
+                          if img.width != null
+                            assign second_image = img
+                            assign debug_info = debug_info | append: 'img (direct) found, width: ' | append: img.width
+                            break
+                          else
+                            assign debug_info = debug_info | append: 'img exists but no width, keys: '
+                            comment
+                              Try to output what properties img has (for debugging)
+                            endcomment
+                          endif
                         endif
-                      else
-                        assign debug_info = debug_info | append: ', gallery empty'
+                      endfor
+                      if second_image == null
+                        assign debug_info = debug_info | append: 'none found'
                       endif
                     else
-                      assign debug_info = debug_info | append: 'no'
+                      if variant_gallery_images == blank
+                        assign debug_info = debug_info | append: 'no'
+                      else
+                        assign debug_info = debug_info | append: 'yes but empty'
+                      endif
                     endif
                   -%}
                   <!-- DEBUG: {{ debug_info }} -->
@@ -144,7 +164,7 @@
                       data-debug="second-image-rendered"
                     >
                   {%- else -%}
-                    <!-- DEBUG: Second image not rendered - second_image is null or blank -->
+                    <!-- DEBUG: Second image not rendered - second_image is null or blank, debug: {{ debug_info }} -->
                   {%- endif -%}
                 {%- else -%}
                   <!-- DEBUG: show_secondary_image is false -->
