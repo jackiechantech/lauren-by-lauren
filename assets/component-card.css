@@ -381,23 +381,23 @@
 }
 
 @media screen and (min-width: 990px) {
-  .card .media.media--hover-effect > img:only-child,
-  .card-wrapper .media.media--hover-effect > img:only-child {
+  .card .media.media--hover-effect img:only-child,
+  .card-wrapper .media.media--hover-effect img:only-child {
     transition: transform var(--duration-long) ease;
   }
 
-  .card:hover .media.media--hover-effect > img:first-child:only-child,
-  .card-wrapper:hover .media.media--hover-effect > img:first-child:only-child {
+  .card:hover .media.media--hover-effect img:first-child:only-child,
+  .card-wrapper:hover .media.media--hover-effect img:first-child:only-child {
     transform: scale(1.03);
   }
 
-  .card-wrapper:hover .media.media--hover-effect > img:first-child:not(:only-child) {
+  .card-wrapper:hover .media.media--hover-effect img:first-child:not(:only-child) {
     opacity: 0;
   }
 
-  .card-wrapper:hover .media.media--hover-effect > img + img {
+  .card-wrapper:hover .media.media--hover-effect img + img {
     opacity: 1;
-    transition: transform var(--duration-long) ease;
+    transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform var(--duration-long) ease;
     transform: scale(1.03);
   }
 
