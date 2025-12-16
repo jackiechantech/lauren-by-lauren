@@ -294,6 +294,7 @@
   object-fit: cover;
   object-position: center center;
   width: 100%;
+  image-rendering: -webkit-optimize-contrast;
 }
 
 .card__inner:not(.ratio) > .card__content {
