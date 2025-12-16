@@ -393,12 +393,22 @@
 
   .card-wrapper:hover .media.media--hover-effect img:first-child:not(:only-child) {
     opacity: 0;
+    z-index: 1;
   }
 
-  .card-wrapper:hover .media.media--hover-effect img + img {
-    opacity: 1;
+  .card-wrapper:hover .media.media--hover-effect img + img,
+  .product-card-wrapper:hover .media.media--hover-effect img + img {
+    opacity: 1 !important;
+    z-index: 2;
     transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform var(--duration-long) ease;
     transform: scale(1.03);
+    pointer-events: auto;
+  }
+  
+  .card-wrapper:hover .media.media--hover-effect img:first-child:not(:only-child),
+  .product-card-wrapper:hover .media.media--hover-effect img:first-child:not(:only-child) {
+    opacity: 0;
+    z-index: 1;
   }
 
   .underline-links-hover:hover a {
